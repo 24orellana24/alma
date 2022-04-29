@@ -36,5 +36,21 @@ app.get("/registro", async (req, res) => {
   });
 });
 
+app.get("/login", async (req, res) => {
+  //const data = await consultaSkaters();
+  res.render("login", {
+    layout: "login"
+    //skaters: data
+  });
+});
+
+app.get("/dashboard", async (req, res) => {
+  //const data = await consultaSkaters();
+  res.render("dashboard", {
+    layout: "dashboard"
+    //skaters: data
+  });
+});
+
 // Inicializando servidor en puerto 3000
 app.listen(3000, () => console.log("Servidor activo en puerto 3000"))
