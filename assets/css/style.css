@@ -4,7 +4,7 @@ body {
   font-family: 'Montserrat', sans-serif;
 }
 
-a.mi-color {
+a.texto-menu {
   color: white;
 }
 
@@ -15,6 +15,11 @@ a.mi-color {
 .mi-img-principal {
   max-width: 100%;
   max-height: 100%;
+}
+
+.mi-img-perfil {
+  width: 150px;
+  height: 150px;
 }
 
 .texto-resumen {
