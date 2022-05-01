@@ -52,5 +52,13 @@ app.get("/dashboard", async (req, res) => {
   });
 });
 
+app.get("/agenda", async (req, res) => {
+  //const data = await consultaSkaters();
+  res.render("agenda", {
+    layout: "agenda"
+    //skaters: data
+  });
+});
+
 // Inicializando servidor en puerto 3000
 app.listen(3000, () => console.log("Servidor activo en puerto 3000"))
