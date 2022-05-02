@@ -13,6 +13,11 @@ app.engine(
   })
 );
 
+// Configuración dependencia body parser
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 // Configuración ruta de acceso para consumir framework boostrap
 app.use("/bootstrap", express.static(__dirname + "/node_modules/bootstrap/dist/css"));
 
@@ -58,6 +63,15 @@ app.get("/agenda", async (req, res) => {
     layout: "agenda"
     //skaters: data
   });
+});
+
+app.post("/registro", async (req, res) => {
+  console.log(req.body);
+  //const data = await consultaSkaters();
+  //res.render("registro", {
+  //  layout: "registro"
+  //  skaters: data
+  //});
 });
 
 // Inicializando servidor en puerto 3000
