@@ -19,7 +19,7 @@ CREATE TABLE clientes (
   celular NUMERIC(9, 0) NOT NULL,
   comuna VARCHAR(50),
   estado BOOLEAN NOT NULL,
-  foto VARCHAR(50),
+  foto VARCHAR(100),
   password VARCHAR(15) NOT NULL,
 
   PRIMARY KEY (rut)
