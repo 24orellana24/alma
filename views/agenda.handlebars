@@ -13,28 +13,28 @@
   {{> bienvenida}}
 
   <div>
-    <h4 class="my-3">Indícanos el día y la hora que te gustaría ser contactado</h4>
-    <form>
-      <div class="form-group row w-50 m-auto">
+    <h4 class="my-5">Indícanos el día y la hora que te gustaría ser contactado</h4>
+    <form class="mb-3">
+      <div class="form-group row w-50 m-auto mb-3">
         <div class="form-group col-4 col-sm-4 mb-3">
-          <label>Rut</label>
-          <input id="rut" name="rut" class="form-control m-auto" />
+          <label>te llamaremos al</label>
+          <input id="celular" name="celular" class="form-control m-auto text-center" value="{{cliente.celular}}" readonly/>
         </div>
         <div class="form-group col-4 col-sm-4 mb-3">
-          <label>Fecha</label>
-          <input id="fecha" name="fecha" type="date" class="form-control m-auto text-center" />
+          <label>el día</label>
+          <input id="fecha" name="fecha" type="date" class="form-control m-auto text-center" required/>
         </div>
         <div class="form-group col-4 col-sm-4 mb-3">
-          <label>Hora</label>
-          <input id="hora" name="hora" type="time" class="form-control m-auto text-center" />
+          <label>a las</label>
+          <input id="hora" name="hora" type="time" class="form-control m-auto text-center" required/>
         </div>
-        <div class="form-group col-12 col-sm-12 mb-3">
-          <label>Comentario</label>
-          <textarea id="comentario" name="comentario" class="form-control m-auto" rows="5"></textarea>
+        <div class="form-group col-12 col-sm-12 mt-3 mb-3">
+          <label>Compártenos tus dudas</label>
+          <textarea id="comentario" name="comentario" class="form-control m-auto" rows="5" required></textarea>
         </div>
       </div>
-        <button formmethod="POST" formenctype="multipart/form-data" class="btn btn-primary mb-3">...agendar...</button>
-        <a href="/dashboard" class="btn btn-primary mb-3">...volver...</a>
+        <button formmethod="POST" formenctype="multipart/form-data" class="btn btn-success mb-3 bi bi-calendar-check-fill"> ...agendar</button>
+        <a href="/dashboard" class="btn btn-danger mb-3 bi bi-skip-backward-fill"> ...volver</a>
     </form>
   </div>
 
