@@ -1,5 +1,5 @@
 // Importación de funciones con las querys que procesan sobre la BD
-const { nuevoCliente, consultaCliente } = require("./querys");
+const { nuevoCliente, consultaCliente, nuevoSemaforo } = require("./querys");
 
 // Configuración dependencia express
 const express = require("express");
@@ -9,8 +9,9 @@ const app = express();
 const jwt = require("jsonwebtoken");
 const secretKey = "api-alma-$";
 
-// Configuración dependencia uuid
+// Configuración dependencia uuid y moment
 const { v4: uuidv4 } = require('uuid');
+const moment = require("moment");
 
 // Configuración dependencia handlebars y sus rutas
 const exphbs = require("express-handlebars");
@@ -37,7 +38,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Configuración ruta de acceso para consumir framework boostrap
-app.use("/bootstrap", express.static(__dirname + "/node_modules/bootstrap/dist/css"));
+app.use("/bootstrap", express.static(`${__dirname}/node_modules/bootstrap/dist/css`));
+app.use("/bootstrap-icons", express.static(`${__dirname}/node_modules/bootstrap-icons/font`));
 
 // Configuración ruta de lectura de archivos propios del proyecto
 app.use(express.static(`${__dirname}/assets`));
@@ -61,15 +63,10 @@ app.get("/login", async (req, res) => {
   });
 });
 
-app.get("/dashboard", async (req, res) => {
+app.get("/dashboard", validarToken, async (req, res) => {
   res.render("dashboard", {
-    layout: "dashboard"
-  });
-});
-
-app.get("/agenda", async (req, res) => {
-  res.render("agenda", {
-    layout: "agenda"
+    layout: "dashboard",
+    cliente: datosClienteDecodificados
   });
 });
 
@@ -105,24 +102,32 @@ app.post("/registro", async (req, res) => {
 
 });
 
+function generadorAccesoToken(cliente) {
+  return jwt.sign(cliente, secretKey, {expiresIn: "15m"})  
+}
+
+let token = "";
+let datosClienteDecodificados = {};
+
+function validarToken(req, res, next) {
+  if (!token) res.send("Token no generado función validarToken");
+  jwt.verify(token, secretKey, (error, decoded) => {
+    if (error) {
+      res.send("Acceso Denegado al validarToken");
+    } else {
+      datosClienteDecodificados = decoded;
+      next();
+    }
+  });
+}
+
 app.post("/login", async (req, res) => {
 const { rut, password } = req.body;
 const datosCliente = await consultaCliente(rut);
   if (datosCliente !== undefined) {
     if (rut === datosCliente.rut && password === datosCliente.password) {
-      const token = jwt.sign(
-        {
-          exp: Math.floor(Date.now() / 1000) + 1200,
-          data: datosCliente,
-        },
-        secretKey
-      );
-      res.send(`
-        <a href="/bienvenida?token=${token}"> <h2 style="text-align:center"> ¡¡¡Bienvenid@ ${datosCliente.nombre.toUpperCase()}!!!... Pincha aquí para ir a tus datos</h2> </a>
-        <script>
-          localStorage.setItem("token", JSON.stringify("${token}"))
-        </script>
-      `);
+      token = generadorAccesoToken(datosCliente);
+      res.redirect("/dashboard")
     } else {
       res.send(`<script>alert("Rut o Password incorrectos"); window.location.href = "/login"; </script>`);
     }
@@ -131,19 +136,64 @@ const datosCliente = await consultaCliente(rut);
   }
 });
 
-app.get("/bienvenida", (req, res) => {
-  let { token } = req.query;
-  jwt.verify(token, secretKey, (error, decoded) => {
-    error
-    ? res.status(401).send({
-      error: "401 No autorizado",
-      message: err.message,
-    })
-    :
-    res.render("dashboard", {
-      layout: "dashboard",
-      cliente: decoded.data
-    });
+app.get("/dashboard/datos-personales", validarToken, (req, res) => {
+  res.render("infopersonal", {
+    layout: "infopersonal",
+    cliente: datosClienteDecodificados
+  });
+});
+
+app.post("/dashboard/agendar-asesoria", validarToken, async (req, res) => {
+  console.log(datosSemaforo);
+  if (datosSemaforo.ingreso > 0) {
+    await nuevoSemaforo(datosSemaforo);
+  }
+  datosSemaforo = {}
+  console.log(datosSemaforo)
+  res.render("agenda", {
+    layout: "agenda",
+    cliente: datosClienteDecodificados
+  });
+});
+
+let datosSemaforo;
+
+app.post("/dashboard/calcular-semaforo", validarToken, (req, res) => {
+  const { ingreso, cuota, deuda, activo } = req.body;
+  let carga = 0;
+  let leverage = 0;
+  let patrimonio = 0;
+  let evaluacion = -1;
+
+  if (ingreso > 0) {
+    carga = cuota / ingreso;
+    leverage = deuda / ingreso;
+    patrimonio = activo - deuda;
+    if (carga <= (1/4)) {
+      evaluacion = 1;
+    } else if (carga <= (2/4)) {
+      evaluacion = 0;
+    } else {
+      evaluacion = -1;
+    };
+  };
+
+  datosSemaforo = {
+    ingreso: Number(ingreso),
+    cuota: Number(cuota),
+    deuda: Number(deuda),
+    activo: Number(activo),
+    carga: carga,
+    leverage: leverage,
+    patrimonio: patrimonio,
+    fecha_hora: moment(Date.now()).format("DD/MM/YYYY HH:mm:ss"),
+    semaforo: evaluacion,
+    rutCliente: datosClienteDecodificados.rut
+  };
+  res.render("dashboard", {
+    layout: "dashboard",
+    cliente: datosClienteDecodificados,
+    semaforo: datosSemaforo
   });
 });
 
