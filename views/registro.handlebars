@@ -12,6 +12,7 @@
 
   <h1 class="mt-3">Información Personal</h1>
   <p class="mb-5">(*) campos obligatorios</p>
+  <br class="bg-success">
 
   <form method="post" action="/registro" enctype="multipart/form-data">
     <div class="form-group row w-50 m-auto">
@@ -60,7 +61,8 @@
         <input id="foto" name="foto" type="file"/>
       </div>
     </div>
-    <button class="btn btn-primary fs-5 my-5">Registrarme</button>
+    <button class="btn btn-success my-5 bi bi-server">...registrarme</button>
+    <a href="/" class="btn btn-danger my-5 bi bi-skip-backward-fill"> ...volver</a>
   </form>
 
   {{> pie }}
