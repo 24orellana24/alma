@@ -1,3 +1,5 @@
+const moment = require("moment");
+
 // Configuración dependencia postgre_sql
 const { Pool } = require("pg");
 const pool = new Pool({
@@ -42,5 +44,24 @@ async function consultaCliente(rut) {
   }
 }
 
+// Función para registrar datos del semáforo al solicitar acesoría
+async function nuevoSemaforo(semaforo) {
+  try {
+    const SQLquery = {
+      text: `
+      INSERT INTO
+      indicadores (ingreso, cuota, deuda, activo, carga, leverage, patrimonio, fechahora, semaforo, idrut)
+      values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      RETURNING *;`,
+      values: [semaforo.ingreso, semaforo.cuota, semaforo.deuda, semaforo.activo, semaforo.carga, semaforo.leverage, semaforo.patrimonio, moment(semaforo.fecha_hora).format(), semaforo.semaforo, semaforo.rutCliente]
+    }
+    const resultado = await pool.query(SQLquery);
+    return resultado.rows;
+  } catch (error) {
+    console.log(`Error en query nuevo semáforo:\n${error}`);
+    return error.code;
+  }
+}
+
 // Exportando funciones
-module.exports = { nuevoCliente, consultaCliente }
+module.exports = { nuevoCliente, consultaCliente, nuevoSemaforo }
