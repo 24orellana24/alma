@@ -12,66 +12,12 @@
 
   {{> bienvenida}}
 
-  <div class="row mb-5">
+  <div class="row mb-3">
 
-    {{> datosPersonales}}
+    {{> datosFinancieros}}
 
-    <div class="col-sm-4 mb-3">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title mb-3">Mis Datos Financieros</h5>
-            <form>
-              <div class="form-group row w-80 m-auto">
-                <div class="form-group col-12 col-sm-6 mb-3">
-                  <label>Ingresos</label>
-                  <input id="ingreso" name="ingreso" class="form-control m-auto" />
-                </div>
-                <div class="form-group col-12 col-sm-6 mb-3">
-                  <label>Cuotas</label>
-                  <input id="cuota" name="cuota" class="form-control m-auto" />
-                </div>
-                <div class="form-group col-12 col-sm-6 mb-3">
-                  <label>Deudas</label>
-                  <input id="deuda" name="deuda" class="form-control m-auto" />
-                </div>
-                <div class="form-group col-12 col-sm-6 mb-3">
-                  <label>Activos</label>
-                  <input id="activo" name="activo" class="form-control m-auto" />
-                </div>
-              </div>
-            </form>
-            <a href="#" class="btn btn-primary">...calcular...</a>
-        </div>
-      </div>
-    </div>
-    <div class="col-sm-4 mb-3">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title mb-3">Semáforo &#128994; &#128993; &#128308;</h5>
-          <form>
-            <div class="form-group row w-80 m-auto">
-              <div class="form-group col-12 col-sm-6 mb-3">
-                <label>Carga Financiera</label>
-                <input id="carga" name="carga" class="form-control m-auto" />
-              </div>
-              <div class="form-group col-12 col-sm-6 mb-3">
-                <label>Leverage</label>
-                <input id="leverage" name="leverage" class="form-control m-auto" />
-              </div>
-              <div class="form-group col-12 col-sm-6 mb-3">
-                <label>Patrimonio</label>
-                <input id="patrimonio" name="patrimonio" class="form-control m-auto" />
-              </div>
-              <div class="form-group col-12 col-sm-6 mb-3">
-                <label>Fecha y Hora</label>
-                <input id="fecha_hora" name="fecha_hora" type="datetime-local" class="form-control m-auto" />
-              </div>
-            </div>
-          </form>
-          <a href="#" class="btn btn-primary">...guardar...</a>
-        </div>
-      </div>
-    </div>
+    {{> datosSemaforo}}
+
   </div>
 
   {{> pie }}
