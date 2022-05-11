@@ -1,5 +1,5 @@
 // Importación de funciones con las querys que procesan sobre la BD
-const { nuevoCliente, consultaCliente, nuevoSemaforo } = require("./querys");
+const { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente } = require("./querys");
 
 // Configuración dependencia express
 const express = require("express");
@@ -25,6 +25,7 @@ app.engine(
 );
 
 // Configuración dependencia fileupload
+const fs = require("fs");
 const expressFileUpload = require("express-fileupload");
 app.use(expressFileUpload({
   limits: { fileSize: 5000000 },
@@ -64,9 +65,10 @@ app.get("/login", async (req, res) => {
 });
 
 app.get("/dashboard", validarToken, async (req, res) => {
+  const resultado = await consultaCliente(datosClienteDecodificados.rut);
   res.render("dashboard", {
     layout: "dashboard",
-    cliente: datosClienteDecodificados
+    cliente: resultado[0]
   });
 });
 
@@ -123,10 +125,10 @@ function validarToken(req, res, next) {
 
 app.post("/login", async (req, res) => {
 const { rut, password } = req.body;
-const datosCliente = await consultaCliente(rut);
-  if (datosCliente !== undefined) {
-    if (rut === datosCliente.rut && password === datosCliente.password) {
-      token = generadorAccesoToken(datosCliente);
+const resultado = await consultaCliente(rut);
+  if (resultado !== undefined) {
+    if (rut === resultado[0].rut && password === resultado[0].password) {
+      token = generadorAccesoToken(resultado[0]);
       res.redirect("/dashboard")
     } else {
       res.send(`<script>alert("Rut o Password incorrectos"); window.location.href = "/login"; </script>`);
@@ -136,20 +138,20 @@ const datosCliente = await consultaCliente(rut);
   }
 });
 
-app.get("/dashboard/datos-personales", validarToken, (req, res) => {
+app.get("/dashboard/datos-personales", validarToken, async (req, res) => {
+  const resultado = await consultaCliente(datosClienteDecodificados.rut);
+  resultado[0].fechanacimiento = moment(resultado[0].fechanacimiento).format("YYYY-MM-DD");
   res.render("infopersonal", {
     layout: "infopersonal",
-    cliente: datosClienteDecodificados
+    cliente: resultado[0]
   });
 });
 
 app.post("/dashboard/agendar-asesoria", validarToken, async (req, res) => {
-  console.log(datosSemaforo);
   if (datosSemaforo.ingreso > 0) {
     await nuevoSemaforo(datosSemaforo);
   }
   datosSemaforo = {}
-  console.log(datosSemaforo)
   res.render("agenda", {
     layout: "agenda",
     cliente: datosClienteDecodificados
@@ -195,6 +197,47 @@ app.post("/dashboard/calcular-semaforo", validarToken, (req, res) => {
     cliente: datosClienteDecodificados,
     semaforo: datosSemaforo
   });
+});
+
+app.post("/dashboard/datos-personales", validarToken, async (req, res) => {
+  const { rut, email, apellido_paterno, apellido_materno, nombre, fecha_nacimiento, celular, comuna, password, nombre_foto } = req.body;
+  const datosCliente = {
+    rut: rut,
+    email: email,
+    apellido_paterno: apellido_paterno,
+    apellido_materno: apellido_materno,
+    nombre: nombre,
+    fecha_nacimiento: fecha_nacimiento,
+    celular: celular,
+    comuna: comuna,
+    password: password,
+    nombre_foto: nombre_foto
+  };
+  
+  if (req.files) {
+    if (datosCliente.nombre_foto !== "foto_generica.png") {
+      fs.unlink(`${__dirname}/assets/img/perfil/${datosCliente.nombre_foto}`, (err) => {
+        if (err) {
+          const { code } = err;
+          res.send(`<script>alert("Error al actualizar foto de perfil: ${code}"); window.location.href = "/dashboard/datos-personales"; </script>`);
+        }
+      });
+    }
+    const { foto } = req.files;
+    datosCliente.nombre_foto = `${rut}_${uuidv4()}.png`;
+    foto.mv(`${__dirname}/assets/img/perfil/${datosCliente.nombre_foto}`);
+  }
+
+  const resultado = await actualizarCliente(datosCliente);
+
+  if (resultado) {
+    resultado[0].fechanacimiento = moment(resultado[0].fechanacimiento).format("YYYY-MM-DD");
+    res.render("infopersonal", {
+      layout: "infopersonal",
+      cliente: resultado[0]
+    });
+  }
+
 });
 
 // Inicializando servidor en puerto 3000

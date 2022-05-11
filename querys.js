@@ -36,8 +36,8 @@ async function consultaCliente(rut) {
       text: `SELECT * FROM clientes WHERE rut=$1`,
       values: [rut]
     }
-    const datosCliente = await pool.query(SQLquery);
-    return datosCliente.rows[0];
+    const resultado = await pool.query(SQLquery);
+    return resultado.rows;
   } catch (error) {
     console.log(`Error en query consulta cliente:\n${error}`);
     return error.code;
@@ -63,5 +63,22 @@ async function nuevoSemaforo(semaforo) {
   }
 }
 
+// Función para actualizar la información de un cliente en la BD
+async function actualizarCliente(cliente) {
+  try {
+    const SQLquery = {
+      text: `
+      UPDATE clientes
+      SET nombre=$1, apellidopaterno=$2, apellidomaterno=$3, fechanacimiento=$4, email=$5, celular=$6, comuna=$7, foto=$8, password=$9 WHERE rut=$10 RETURNING *;`,
+      values: [cliente.nombre, cliente.apellido_paterno, cliente.apellido_materno, cliente.fecha_nacimiento, cliente.email, cliente.celular, cliente.comuna, cliente.nombre_foto, cliente.password, cliente.rut]
+    }
+    const resultado = await pool.query(SQLquery);
+    return resultado.rows;
+  } catch (error) {
+    console.log(`Error en query actualizar cliente:\n${error}`);
+    return error.code;
+  }
+}
+
 // Exportando funciones
-module.exports = { nuevoCliente, consultaCliente, nuevoSemaforo }
+module.exports = { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente }
