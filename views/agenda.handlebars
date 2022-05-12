@@ -14,7 +14,7 @@
 
   <div>
     <h4 class="my-5">Indícanos el día y la hora que te gustaría ser contactado</h4>
-    <form class="mb-3">
+    <form method="post" action="/dashboard/agendar-asesoria/cita" enctype="multipart/form-data" class="mb-3">
       <div class="form-group row w-50 m-auto mb-3">
         <div class="form-group col-4 col-sm-4 mb-3">
           <label>te llamaremos al</label>
@@ -33,11 +33,10 @@
           <textarea id="comentario" name="comentario" class="form-control m-auto" rows="5" required></textarea>
         </div>
       </div>
-        <button formmethod="POST" formenctype="multipart/form-data" class="btn btn-success mb-3 bi bi-calendar-check-fill"> ...agendar</button>
-    </form>
+      <button class="btn btn-success mb-3 bi bi-calendar-check-fill"> ...agendar</button>
       <a href="/dashboard" class="btn btn-danger mb-3 bi bi-skip-backward-fill"> ...volver</a>
+    </form>
   </div>
-
 
   {{> pie }}
 

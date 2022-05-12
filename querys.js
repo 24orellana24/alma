@@ -95,5 +95,24 @@ async function consultaSemaforo(rut) {
   }
 }
 
+// Función para registrar datos del semáforo al solicitar acesoría
+async function nuevaCita(cita) {
+  try {
+    const SQLquery = {
+      text: `
+      INSERT INTO
+      citas (fecha, hora, comentario, estado, idrut)
+      values ($1, $2, $3, $4, $5)
+      RETURNING *;`,
+      values: [cita.fecha, cita.hora, cita.comentario, cita.estado, cita.rut]
+    }
+    const resultadoCita = await pool.query(SQLquery);
+    return resultadoCita.rows;
+  } catch (error) {
+    console.log(`Error en query nueva cita:\n${error}`);
+    return error.code;
+  }
+}
+
 // Exportando funciones
-module.exports = { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo }
+module.exports = { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo, nuevaCita }

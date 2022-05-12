@@ -1,5 +1,5 @@
 // Importación de funciones con las querys que procesan sobre la BD
-const { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo } = require("./querys");
+const { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo, nuevaCita } = require("./querys");
 
 // Configuración dependencia express
 const express = require("express");
@@ -165,6 +165,7 @@ app.get("/dashboard/datos-personales", validarToken, async (req, res) => {
 });
 
 app.post("/dashboard/agendar-asesoria", validarToken, async (req, res) => {
+  const resultadoCliente = await consultaCliente(datosClienteDecodificados.rut);
   if (datosSemaforo) {    
     if (datosSemaforo.ingreso > 0) {
       await nuevoSemaforo(datosSemaforo);
@@ -173,7 +174,7 @@ app.post("/dashboard/agendar-asesoria", validarToken, async (req, res) => {
   datosSemaforo = {}
   res.render("agenda", {
     layout: "agenda",
-    cliente: datosClienteDecodificados
+    cliente: resultadoCliente[0]
   });
 });
 
@@ -258,6 +259,26 @@ app.post("/dashboard/datos-personales", validarToken, async (req, res) => {
   }
 
 });
+
+app.post("/dashboard/agendar-asesoria/cita", validarToken, async (req, res) => {
+  const { fecha, hora, comentario } = req.body;
+  const datosCita = {
+    fecha: fecha,
+    hora: hora,
+    comentario: comentario,
+    estado: false,
+    rut: datosClienteDecodificados.rut
+  }
+  const resultadoCita = await nuevaCita(datosCita);
+
+  if (resultadoCita) {
+    console.log(resultadoCita)
+    res.send(`<script>alert("Cita agendada para el ${moment(resultadoCita[0].fecha).format("DD-MM-YYYY")} a las ${resultadoCita[0].hora} "); window.location.href = "/dashboard"; </script>`);
+  } else {
+    console.log(error.code)
+    res.send(`<script>alert("Error al generar cita: ${error.code}"); window.location.href = "/dashboard/agendar-asesoria"; </script>`);
+  };
+})
 
 // Inicializando servidor en puerto 3000
 app.listen(3000, () => console.log("Servidor activo en puerto 3000"))
