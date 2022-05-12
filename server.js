@@ -1,5 +1,5 @@
 // Importación de funciones con las querys que procesan sobre la BD
-const { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente } = require("./querys");
+const { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo } = require("./querys");
 
 // Configuración dependencia express
 const express = require("express");
@@ -65,10 +65,27 @@ app.get("/login", async (req, res) => {
 });
 
 app.get("/dashboard", validarToken, async (req, res) => {
-  const resultado = await consultaCliente(datosClienteDecodificados.rut);
+  const resultadoCliente = await consultaCliente(datosClienteDecodificados.rut);
+  let resultadoSemaforo = await consultaSemaforo(datosClienteDecodificados.rut);
+  if (resultadoSemaforo.length > 0) {
+    resultadoSemaforo[0].fechahora = moment(resultadoSemaforo[0].fechahora).format("DD-MM-YYYY HH:mm:ss");
+  } else {
+    resultadoSemaforo = [{
+      ingreso: 0,
+      cuota: 0,
+      deuda: 0,
+      activo: 0,
+      carga: 0,
+      leverage: 0,
+      patrimonio: 0,
+      fechahora: moment(Date.now()).format("DD/MM/YYYY HH:mm:ss"),
+      semaforo: 0
+    }];
+  }
   res.render("dashboard", {
     layout: "dashboard",
-    cliente: resultado[0]
+    cliente: resultadoCliente[0],
+    semaforo: resultadoSemaforo[0]
   });
 });
 
@@ -125,10 +142,10 @@ function validarToken(req, res, next) {
 
 app.post("/login", async (req, res) => {
 const { rut, password } = req.body;
-const resultado = await consultaCliente(rut);
-  if (resultado !== undefined) {
-    if (rut === resultado[0].rut && password === resultado[0].password) {
-      token = generadorAccesoToken(resultado[0]);
+const resultadoCliente = await consultaCliente(rut);
+  if (resultadoCliente !== undefined) {
+    if (rut === resultadoCliente[0].rut && password === resultadoCliente[0].password) {
+      token = generadorAccesoToken(resultadoCliente[0]);
       res.redirect("/dashboard")
     } else {
       res.send(`<script>alert("Rut o Password incorrectos"); window.location.href = "/login"; </script>`);
@@ -139,17 +156,19 @@ const resultado = await consultaCliente(rut);
 });
 
 app.get("/dashboard/datos-personales", validarToken, async (req, res) => {
-  const resultado = await consultaCliente(datosClienteDecodificados.rut);
-  resultado[0].fechanacimiento = moment(resultado[0].fechanacimiento).format("YYYY-MM-DD");
+  const resultadoCliente = await consultaCliente(datosClienteDecodificados.rut);
+  resultadoCliente[0].fechanacimiento = moment(resultadoCliente[0].fechanacimiento).format("YYYY-MM-DD");
   res.render("infopersonal", {
     layout: "infopersonal",
-    cliente: resultado[0]
+    cliente: resultadoCliente[0]
   });
 });
 
 app.post("/dashboard/agendar-asesoria", validarToken, async (req, res) => {
-  if (datosSemaforo.ingreso > 0) {
-    await nuevoSemaforo(datosSemaforo);
+  if (datosSemaforo) {    
+    if (datosSemaforo.ingreso > 0) {
+      await nuevoSemaforo(datosSemaforo);
+    }
   }
   datosSemaforo = {}
   res.render("agenda", {
@@ -168,8 +187,8 @@ app.post("/dashboard/calcular-semaforo", validarToken, (req, res) => {
   let evaluacion = -1;
 
   if (ingreso > 0) {
-    carga = cuota / ingreso;
-    leverage = deuda / ingreso;
+    carga = (cuota / ingreso).toFixed(4);
+    leverage = (deuda / ingreso).toFixed(4);
     patrimonio = activo - deuda;
     if (carga <= (1/4)) {
       evaluacion = 1;
@@ -188,7 +207,7 @@ app.post("/dashboard/calcular-semaforo", validarToken, (req, res) => {
     carga: carga,
     leverage: leverage,
     patrimonio: patrimonio,
-    fecha_hora: moment(Date.now()).format("DD/MM/YYYY HH:mm:ss"),
+    fechahora: moment(Date.now()).format("DD/MM/YYYY HH:mm:ss"),
     semaforo: evaluacion,
     rutCliente: datosClienteDecodificados.rut
   };

@@ -36,8 +36,8 @@ async function consultaCliente(rut) {
       text: `SELECT * FROM clientes WHERE rut=$1`,
       values: [rut]
     }
-    const resultado = await pool.query(SQLquery);
-    return resultado.rows;
+    const resultadoCliente = await pool.query(SQLquery);
+    return resultadoCliente.rows;
   } catch (error) {
     console.log(`Error en query consulta cliente:\n${error}`);
     return error.code;
@@ -80,5 +80,20 @@ async function actualizarCliente(cliente) {
   }
 }
 
+// Función para consultar último semáforo generado por el cliente
+async function consultaSemaforo(rut) {
+  try {
+    const SQLquery = {
+      text: `SELECT * FROM indicadores WHERE idrut = $1 AND fechahora = (SELECT MAX(fechahora) FROM indicadores WHERE idrut = $1);`,
+      values: [rut]
+    }
+    const resultadoSemaforo = await pool.query(SQLquery);
+    return resultadoSemaforo.rows;
+  } catch (error) {
+    console.log(`Error en query consulta semáforo:\n${error}`);
+    return error.code;
+  }
+}
+
 // Exportando funciones
-module.exports = { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente }
+module.exports = { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo }
