@@ -191,7 +191,9 @@ app.post("/dashboard/calcular-semaforo", validarToken, (req, res) => {
   let carga = 0;
   let leverage = 0;
   let patrimonio = 0;
-  let evaluacion = -1;
+  let evaluacion = 0;
+  let color = ""
+  let texto = ""
 
   if (ingreso > 0) {
     carga = (cuota / ingreso).toFixed(4);
@@ -199,10 +201,16 @@ app.post("/dashboard/calcular-semaforo", validarToken, (req, res) => {
     patrimonio = activo - deuda;
     if (carga <= (1/4)) {
       evaluacion = 1;
+      color = "success"
+      texto = "BUENO"
     } else if (carga <= (2/4)) {
       evaluacion = 0;
+      color = "warning"
+      texto = "REGULAR"
     } else {
       evaluacion = -1;
+      color = "danger"
+      texto = "MALO"
     };
   };
 
@@ -216,6 +224,8 @@ app.post("/dashboard/calcular-semaforo", validarToken, (req, res) => {
     patrimonio: patrimonio,
     fechahora: moment(Date.now()).format("DD/MM/YYYY HH:mm:ss"),
     semaforo: evaluacion,
+    color: color,
+    texto: texto,
     rutCliente: datosClienteDecodificados.rut
   };
   res.render("dashboard", {
