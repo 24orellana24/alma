@@ -64,6 +64,12 @@ app.get("/login", async (req, res) => {
   });
 });
 
+app.get("/login-asesor", async (req, res) => {
+  res.render("login-asesor", {
+    layout: "login-asesor"
+  });
+});
+
 app.get("/dashboard", validarToken, async (req, res) => {
   const resultadoCliente = await consultaCliente(datosClienteDecodificados.rut);
   let resultadoSemaforo = await consultaSemaforo(datosClienteDecodificados.rut);
@@ -272,10 +278,8 @@ app.post("/dashboard/agendar-asesoria/cita", validarToken, async (req, res) => {
   const resultadoCita = await nuevaCita(datosCita);
 
   if (resultadoCita) {
-    console.log(resultadoCita)
     res.send(`<script>alert("Cita agendada para el ${moment(resultadoCita[0].fecha).format("DD-MM-YYYY")} a las ${resultadoCita[0].hora} "); window.location.href = "/dashboard"; </script>`);
   } else {
-    console.log(error.code)
     res.send(`<script>alert("Error al generar cita: ${error.code}"); window.location.href = "/dashboard/agendar-asesoria"; </script>`);
   };
 })
