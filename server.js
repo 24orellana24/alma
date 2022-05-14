@@ -9,9 +9,10 @@ const app = express();
 const jwt = require("jsonwebtoken");
 const secretKey = "api-alma-$";
 
-// Configuración dependencia uuid y moment
+// Configuración dependencia uuid, moment y axios
 const { v4: uuidv4 } = require('uuid');
 const moment = require("moment");
+const axios = require("axios");
 
 // Configuración dependencia handlebars y sus rutas
 const exphbs = require("express-handlebars");
@@ -35,6 +36,7 @@ app.use(expressFileUpload({
 
 // Configuración dependencia body parser
 const bodyParser = require("body-parser");
+const { get } = require("http");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -46,27 +48,34 @@ app.use("/bootstrap-icons", express.static(`${__dirname}/node_modules/bootstrap-
 app.use(express.static(`${__dirname}/assets`));
 
 // Rutas de ejecución
+let indicadoresEconomicos;
 app.get("/", async (req, res) => {
+  const { data } = await axios.get("https://mindicador.cl/api");
+  indicadoresEconomicos = data;
   res.render("index", {
-    layout: "index"
+    layout: "index",
+    indicadoresEconomicos: indicadoresEconomicos
   });
 });
 
 app.get("/registro", async (req, res) => {
   res.render("registro", {
-    layout: "registro"
+    layout: "registro",
+    indicadoresEconomicos: indicadoresEconomicos
   });
 });
 
 app.get("/login", async (req, res) => {
   res.render("login", {
-    layout: "login"
+    layout: "login",
+    indicadoresEconomicos: indicadoresEconomicos
   });
 });
 
 app.get("/login-asesor", async (req, res) => {
   res.render("login-asesor", {
-    layout: "login-asesor"
+    layout: "login-asesor",
+    indicadoresEconomicos: indicadoresEconomicos
   });
 });
 
@@ -91,7 +100,37 @@ app.get("/dashboard", validarToken, async (req, res) => {
   res.render("dashboard", {
     layout: "dashboard",
     cliente: resultadoCliente[0],
-    semaforo: resultadoSemaforo[0]
+    semaforo: resultadoSemaforo[0],
+    indicadoresEconomicos: indicadoresEconomicos
+  });
+});
+
+function generadorAccesoToken(cliente) {
+  return jwt.sign(cliente, secretKey, {expiresIn: "15m"})  
+}
+
+let token = "";
+let datosClienteDecodificados = {};
+
+function validarToken(req, res, next) {
+  if (!token) res.send("Token no generado función validarToken");
+  jwt.verify(token, secretKey, (error, decoded) => {
+    if (error) {
+      res.send("Acceso Denegado al validarToken");
+    } else {
+      datosClienteDecodificados = decoded;
+      next();
+    }
+  });
+}
+
+app.get("/dashboard/datos-personales", validarToken, async (req, res) => {
+  const resultadoCliente = await consultaCliente(datosClienteDecodificados.rut);
+  resultadoCliente[0].fechanacimiento = moment(resultadoCliente[0].fechanacimiento).format("YYYY-MM-DD");
+  res.render("infopersonal", {
+    layout: "infopersonal",
+    cliente: resultadoCliente[0],
+    indicadoresEconomicos: indicadoresEconomicos
   });
 });
 
@@ -127,29 +166,11 @@ app.post("/registro", async (req, res) => {
 
 });
 
-function generadorAccesoToken(cliente) {
-  return jwt.sign(cliente, secretKey, {expiresIn: "15m"})  
-}
-
-let token = "";
-let datosClienteDecodificados = {};
-
-function validarToken(req, res, next) {
-  if (!token) res.send("Token no generado función validarToken");
-  jwt.verify(token, secretKey, (error, decoded) => {
-    if (error) {
-      res.send("Acceso Denegado al validarToken");
-    } else {
-      datosClienteDecodificados = decoded;
-      next();
-    }
-  });
-}
-
 app.post("/login", async (req, res) => {
-const { rut, password } = req.body;
-const resultadoCliente = await consultaCliente(rut);
-  if (resultadoCliente !== undefined) {
+  const { rut, password } = req.body;
+  const resultadoCliente = await consultaCliente(rut);
+  console.log(resultadoCliente);
+  if (resultadoCliente) {
     if (rut === resultadoCliente[0].rut && password === resultadoCliente[0].password) {
       token = generadorAccesoToken(resultadoCliente[0]);
       res.redirect("/dashboard")
@@ -159,15 +180,6 @@ const resultadoCliente = await consultaCliente(rut);
   } else {
     res.send(`<script>alert("El rut NO se encuentra registrado"); window.location.href = "/login"; </script>`);
   }
-});
-
-app.get("/dashboard/datos-personales", validarToken, async (req, res) => {
-  const resultadoCliente = await consultaCliente(datosClienteDecodificados.rut);
-  resultadoCliente[0].fechanacimiento = moment(resultadoCliente[0].fechanacimiento).format("YYYY-MM-DD");
-  res.render("infopersonal", {
-    layout: "infopersonal",
-    cliente: resultadoCliente[0]
-  });
 });
 
 app.post("/dashboard/agendar-asesoria", validarToken, async (req, res) => {
@@ -180,7 +192,8 @@ app.post("/dashboard/agendar-asesoria", validarToken, async (req, res) => {
   datosSemaforo = {}
   res.render("agenda", {
     layout: "agenda",
-    cliente: resultadoCliente[0]
+    cliente: resultadoCliente[0],
+    indicadoresEconomicos: indicadoresEconomicos
   });
 });
 
@@ -231,7 +244,8 @@ app.post("/dashboard/calcular-semaforo", validarToken, (req, res) => {
   res.render("dashboard", {
     layout: "dashboard",
     cliente: datosClienteDecodificados,
-    semaforo: datosSemaforo
+    semaforo: datosSemaforo,
+    indicadoresEconomicos: indicadoresEconomicos
   });
 });
 
@@ -270,7 +284,8 @@ app.post("/dashboard/datos-personales", validarToken, async (req, res) => {
     resultado[0].fechanacimiento = moment(resultado[0].fechanacimiento).format("YYYY-MM-DD");
     res.render("infopersonal", {
       layout: "infopersonal",
-      cliente: resultado[0]
+      cliente: resultado[0],
+      indicadoresEconomicos: indicadoresEconomicos
     });
   }
 
