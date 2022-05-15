@@ -83,7 +83,8 @@ app.get("/dashboard", validarToken, async (req, res) => {
   const resultadoCliente = await consultaCliente(datosClienteDecodificados.rut);
   let resultadoSemaforo = await consultaSemaforo(datosClienteDecodificados.rut);
   if (resultadoSemaforo.length > 0) {
-    resultadoSemaforo[0].fechahora = moment(resultadoSemaforo[0].fechahora).format("DD-MM-YYYY HH:mm:ss");
+    resultadoSemaforo = [calcularSemaforo(resultadoSemaforo[0].ingreso, resultadoSemaforo[0].cuota, resultadoSemaforo[0].deuda, resultadoSemaforo[0].activo)];
+    //resultadoSemaforo[0].fechahora = moment(resultadoSemaforo[0].fechahora).format("DD-MM-YYYY HH:mm:ss");
   } else {
     resultadoSemaforo = [{
       ingreso: 0,
@@ -169,8 +170,7 @@ app.post("/registro", async (req, res) => {
 app.post("/login", async (req, res) => {
   const { rut, password } = req.body;
   const resultadoCliente = await consultaCliente(rut);
-  console.log(resultadoCliente);
-  if (resultadoCliente) {
+  if (resultadoCliente.length > 0 && resultadoCliente !== undefined) {
     if (rut === resultadoCliente[0].rut && password === resultadoCliente[0].password) {
       token = generadorAccesoToken(resultadoCliente[0]);
       res.redirect("/dashboard")
@@ -199,8 +199,7 @@ app.post("/dashboard/agendar-asesoria", validarToken, async (req, res) => {
 
 let datosSemaforo;
 
-app.post("/dashboard/calcular-semaforo", validarToken, (req, res) => {
-  const { ingreso, cuota, deuda, activo } = req.body;
+function calcularSemaforo(ingreso, cuota, deuda, activo) {
   let carga = 0;
   let leverage = 0;
   let patrimonio = 0;
@@ -241,6 +240,12 @@ app.post("/dashboard/calcular-semaforo", validarToken, (req, res) => {
     texto: texto,
     rutCliente: datosClienteDecodificados.rut
   };
+  return datosSemaforo;
+}
+
+app.post("/dashboard/calcular-semaforo", validarToken, (req, res) => {
+  const { ingreso, cuota, deuda, activo } = req.body;
+  const datosSemaforo = calcularSemaforo(ingreso, cuota, deuda, activo);
   res.render("dashboard", {
     layout: "dashboard",
     cliente: datosClienteDecodificados,
