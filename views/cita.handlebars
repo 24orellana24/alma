@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+{{> cabecera}}
+</head>
+  
+<body class="mx-3 bg-light text-center">
+
+  {{> menu }}
+
+  {{> bienvenidaAsesor}}
+
+  <div class="row mb-3">
+    <div class="col-sm-6 mb-3">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Datos Cliente</h5>
+          <hr>
+          {{> datosPersonalesCita}}
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Datos Cita a Gestionar</h5>
+          <hr>
+          {{> datosCita}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{> listaIndicadores}}
+
+  {{> pie }}
+
+</body>
+
+</html>

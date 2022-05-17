@@ -1,5 +1,5 @@
 // Importación de funciones con las querys que procesan sobre la BD
-const { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo, nuevaCita } = require("./querys");
+const { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo, nuevaCita, consultaAsesor, consultaCitas, consultaSemaforos, consultaCita, actualizarCita,consultaCitasRut } = require("./querys");
 
 // Configuración dependencia express
 const express = require("express");
@@ -73,18 +73,30 @@ app.get("/login", async (req, res) => {
 });
 
 app.get("/login-asesor", async (req, res) => {
-  res.render("login-asesor", {
-    layout: "login-asesor",
+  res.render("loginAsesor", {
+    layout: "loginAsesor",
     indicadoresEconomicos: indicadoresEconomicos
   });
 });
 
 app.get("/dashboard", validarToken, async (req, res) => {
-  const resultadoCliente = await consultaCliente(datosClienteDecodificados.rut);
-  let resultadoSemaforo = await consultaSemaforo(datosClienteDecodificados.rut);
+  const resultadoCliente = await consultaCliente(datosDecoded.rut);
+  let resultadoSemaforo = await consultaSemaforo(datosDecoded.rut);
+  let resultadoSemaforos = await consultaSemaforos(datosDecoded.rut);
+  const resultadoCitasRut = await consultaCitasRut(datosDecoded.rut);
+  let cantidadPendientes = 0;
+  let cantidadFinalizadas = 0;
+  let cantidadBueno = 0;
+  let cantidadRegular = 0;
+  let cantidadMalo = 0;
+
+  resultadoCitasRut.forEach(element => {
+    element.fecha = moment(element.fecha).format("DD-MM-YYYY")
+    element.estado ? cantidadFinalizadas = cantidadFinalizadas + 1 : cantidadPendientes = cantidadPendientes + 1;
+  });
+
   if (resultadoSemaforo.length > 0) {
     resultadoSemaforo = [calcularSemaforo(resultadoSemaforo[0].ingreso, resultadoSemaforo[0].cuota, resultadoSemaforo[0].deuda, resultadoSemaforo[0].activo)];
-    //resultadoSemaforo[0].fechahora = moment(resultadoSemaforo[0].fechahora).format("DD-MM-YYYY HH:mm:ss");
   } else {
     resultadoSemaforo = [{
       ingreso: 0,
@@ -98,10 +110,41 @@ app.get("/dashboard", validarToken, async (req, res) => {
       semaforo: 0
     }];
   }
+
+  resultadoSemaforos.forEach(element => {
+    element.fechahora = moment(element.fechahora).format("DD-MM-YYYY HH:mm");
+    if (element.semaforo == 1) {
+      element["color"] = "success";
+      element["texto"] = "BUENO";
+      cantidadBueno = cantidadBueno + 1;
+    } else if (element.semaforo == 0) {
+      element["color"] = "warning";
+      element["texto"] = "REGULAR";
+      cantidadRegular = cantidadRegular + 1; 
+    } else {
+      element["color"] = "danger";
+      element["texto"] = "MALO";
+      cantidadMalo = cantidadMalo + 1
+    }
+  });
+
+  const resumenCantidades = {
+    pendientes: cantidadPendientes,
+    finalizadas: cantidadFinalizadas,
+    totalCitas: resultadoCitasRut.length,
+    buenos: cantidadBueno,
+    regular: cantidadRegular,
+    malo: cantidadMalo,
+    totalSemaforos: resultadoSemaforos.length
+  }
+
   res.render("dashboard", {
     layout: "dashboard",
     cliente: resultadoCliente[0],
     semaforo: resultadoSemaforo[0],
+    citas: resultadoCitasRut,
+    indicadores: resultadoSemaforos,
+    totales: resumenCantidades,
     indicadoresEconomicos: indicadoresEconomicos
   });
 });
@@ -111,7 +154,7 @@ function generadorAccesoToken(cliente) {
 }
 
 let token = "";
-let datosClienteDecodificados = {};
+let datosDecoded = {};
 
 function validarToken(req, res, next) {
   if (!token) res.send("Token no generado función validarToken");
@@ -119,14 +162,14 @@ function validarToken(req, res, next) {
     if (error) {
       res.send("Acceso Denegado al validarToken");
     } else {
-      datosClienteDecodificados = decoded;
+      datosDecoded = decoded;
       next();
     }
   });
 }
 
 app.get("/dashboard/datos-personales", validarToken, async (req, res) => {
-  const resultadoCliente = await consultaCliente(datosClienteDecodificados.rut);
+  const resultadoCliente = await consultaCliente(datosDecoded.rut);
   resultadoCliente[0].fechanacimiento = moment(resultadoCliente[0].fechanacimiento).format("YYYY-MM-DD");
   res.render("infopersonal", {
     layout: "infopersonal",
@@ -178,12 +221,12 @@ app.post("/login", async (req, res) => {
       res.send(`<script>alert("Rut o Password incorrectos"); window.location.href = "/login"; </script>`);
     }
   } else {
-    res.send(`<script>alert("El rut NO se encuentra registrado"); window.location.href = "/login"; </script>`);
+    res.send(`<script>alert("Rut o Password incorrectos"); window.location.href = "/login"; </script>`);
   }
 });
 
 app.post("/dashboard/agendar-asesoria", validarToken, async (req, res) => {
-  const resultadoCliente = await consultaCliente(datosClienteDecodificados.rut);
+  const resultadoCliente = await consultaCliente(datosDecoded.rut);
   if (datosSemaforo) {    
     if (datosSemaforo.ingreso > 0) {
       await nuevoSemaforo(datosSemaforo);
@@ -238,7 +281,7 @@ function calcularSemaforo(ingreso, cuota, deuda, activo) {
     semaforo: evaluacion,
     color: color,
     texto: texto,
-    rutCliente: datosClienteDecodificados.rut
+    rutCliente: datosDecoded.rut
   };
   return datosSemaforo;
 }
@@ -248,7 +291,7 @@ app.post("/dashboard/calcular-semaforo", validarToken, (req, res) => {
   const datosSemaforo = calcularSemaforo(ingreso, cuota, deuda, activo);
   res.render("dashboard", {
     layout: "dashboard",
-    cliente: datosClienteDecodificados,
+    cliente: datosDecoded,
     semaforo: datosSemaforo,
     indicadoresEconomicos: indicadoresEconomicos
   });
@@ -303,8 +346,10 @@ app.post("/dashboard/agendar-asesoria/cita", validarToken, async (req, res) => {
     hora: hora,
     comentario: comentario,
     estado: false,
-    rut: datosClienteDecodificados.rut
+    rut: datosDecoded.rut
+
   }
+
   const resultadoCita = await nuevaCita(datosCita);
 
   if (resultadoCita) {
@@ -313,6 +358,99 @@ app.post("/dashboard/agendar-asesoria/cita", validarToken, async (req, res) => {
     res.send(`<script>alert("Error al generar cita: ${error.code}"); window.location.href = "/dashboard/agendar-asesoria"; </script>`);
   };
 })
+
+app.post("/login-asesor", async (req, res) => {
+  const { rut, password } = req.body;
+  const resultadoAsesor = await consultaAsesor(rut);
+  if (resultadoAsesor.length > 0 && resultadoAsesor !== undefined) {
+    if (rut === resultadoAsesor[0].rut && password === resultadoAsesor[0].password) {
+      token = generadorAccesoToken(resultadoAsesor[0]);
+      res.redirect("/dashboard-asesor");
+    } else {
+      res.send(`<script>alert("Rut o Password incorrectos"); window.location.href = "/login-asesor"; </script>`);
+    }
+  } else {
+    res.send(`<script>alert("Rut o Password incorrectos"); window.location.href = "/login-asesor"; </script>`);
+  }
+});
+
+app.get("/dashboard-asesor", validarToken, async (req, res) =>{
+  const resultadoAsesor = await consultaAsesor(datosDecoded.rut);
+  const resultadoCitas = await consultaCitas();
+  let citasPendientes = 0
+  let citasFinalizadas = 0
+  
+  resultadoCitas.forEach(element => {
+    element.fecha = moment(element.fecha).format("DD-MM-YYYY");
+    (element.estado) ? citasFinalizadas = citasFinalizadas + 1 : citasPendientes = citasPendientes + 1;
+  });
+  
+  res.render("dashboardAsesor", {
+    layout: "dashboardAsesor",
+    asesor: resultadoAsesor[0],
+    citas: resultadoCitas,
+    citasFinalizadas: citasFinalizadas,
+    citasPendientes: citasPendientes,
+    indicadoresEconomicos: indicadoresEconomicos
+  });
+})
+
+app.get("/dashboard-asesor/cita?", validarToken, async (req, res) => {
+  const { id, rut } = req.query;
+  const resultadoSemaforos = await consultaSemaforos(rut);
+  const resultadoAsesor = await consultaAsesor(datosDecoded.rut);
+  const resultadoCliente = await consultaCliente(rut);
+  const resultadoCita = await consultaCita(id);
+  const resultadoCitasRut = await consultaCitasRut(rut);
+
+  resultadoCliente[0].fechanacimiento = moment(resultadoCliente[0].fechanacimiento).format("YYYY-MM-DD");
+  resultadoCita[0].fecha = moment(resultadoCita[0].fecha).format("YYYY-MM-DD");
+
+  resultadoCitasRut.forEach(element => element.fecha = moment(element.fecha).format("DD-MM-YYYY"));
+
+  resultadoSemaforos.forEach(element => {
+    element.fechahora = moment(element.fechahora).format("DD-MM-YYYY HH:mm");
+    if (element.semaforo == 1) {
+      element["color"] = "success";
+      element["texto"] = "BUENO";
+    } else if (element.semaforo == 0) {
+      element["color"] = "warning";
+      element["texto"] = "REGULAR";      
+    } else {
+      element["color"] = "danger";
+      element["texto"] = "MALO";
+    }
+  });
+
+  res.render("cita", {
+    layout: "cita",
+    asesor: resultadoAsesor[0],
+    cliente: resultadoCliente[0],
+    cita: resultadoCita[0],
+    citas: resultadoCitasRut,
+    indicadores: resultadoSemaforos,
+    indicadoresEconomicos: indicadoresEconomicos
+  });
+});
+
+app.post("/dashboard-asesor/cerrar-cita", validarToken, async (req, res) => {
+  const { idCita, comentarioAsesor } = req.body;
+  const datosCita = {
+    idCita: idCita,
+    comentarioAsesor: comentarioAsesor,
+    rutAsesor: datosDecoded.rut,
+    estado: true
+  };
+
+  const resultadoCita = await actualizarCita(datosCita);
+
+  if (resultadoCita) {
+    res.send(`<script>alert("Actualización de la cita guardada con éxito"); window.location.href = "/dashboard-asesor"; </script>`);
+  } else {
+    res.send(`<script>alert("Error al actualizar cita: ${error.code}"); window.location.href = "#"; </script>`);
+  };
+
+});
 
 // Inicializando servidor en puerto 3000
 app.listen(3000, () => console.log("Servidor activo en puerto 3000"))

@@ -114,5 +114,101 @@ async function nuevaCita(cita) {
   }
 }
 
+// Función para consultar a un asesor de la BD
+async function consultaAsesor(rut) {
+  try {
+    const SQLquery = {
+      text: `SELECT * FROM asesores WHERE rut=$1`,
+      values: [rut]
+    }
+    const resultadoAsesor = await pool.query(SQLquery);
+    return resultadoAsesor.rows;
+  } catch (error) {
+    console.log(`Error en query consulta asesor:\n${error}`);
+    return error.code;
+  }
+}
+
+// Función para consultar todas las citas de la BD
+async function consultaCitas() {
+  try {
+    const SQLquery = {
+      text: `SELECT ci.idcita, ci.fecha, ci.hora, cl.rut, cl.nombre, cl.celular, cl.email, ci.estado FROM citas as ci JOIN clientes as cl ON idrut = cl.rut ORDER BY ci.fecha ASC, ci.hora ASC`,
+    }
+    const resultadoCitas = await pool.query(SQLquery);
+    return resultadoCitas.rows;
+  } catch (error) {
+    console.log(`Error en query consulta citas:\n${error}`);
+    return error.code;
+  }
+}
+
+// Función para consultar semáforos generado por un cliente
+async function consultaSemaforos(idrut) {
+  try {
+    const SQLquery = {
+      text: `SELECT * FROM indicadores WHERE idrut = $1 ORDER BY fechahora DESC;`,
+      values: [idrut]
+    }
+    
+    const resultadoSemaforos = await pool.query(SQLquery);
+
+    return resultadoSemaforos.rows;
+
+  } catch (error) {
+    console.log(`Error en query consulta semáforo:\n${error}`);
+    return error.code;
+  }
+}
+
+// Función para consultar una cita de la BD
+async function consultaCita(idcita) {
+  try {
+    const SQLquery = {
+      text: `SELECT * FROM citas WHERE idcita=$1`,
+      values: [idcita]
+    }
+    const resultadoCita = await pool.query(SQLquery);
+    return resultadoCita.rows;
+  } catch (error) {
+    console.log(`Error en query consultar una cita:\n${error}`);
+    return error.code;
+  }
+}
+
+// Función para actualizar una cita en la BD
+async function actualizarCita(cita) {
+  try {
+    const SQLquery = {
+      text: `
+      UPDATE citas
+      SET estado=$1, idrutasesor=$2, comentarioasesor=$3
+      WHERE idcita=$4
+      RETURNING *;`,
+      values: [cita.estado, cita.rutAsesor, cita.comentarioAsesor, cita.idCita]
+    }
+    const resultadoCita = await pool.query(SQLquery);
+    return resultadoCita.rows;
+  } catch (error) {
+    console.log(`Error en query actualizar cita:\n${error}`);
+    return error;
+  }
+}
+
+// Función para consultar todas las citas de la BD de un rut
+async function consultaCitasRut(idrut) {
+  try {
+    const SQLquery = {
+      text: `SELECT * FROM citas WHERE idrut=$1  ORDER BY fecha ASC, hora ASC`,
+      values: [idrut]
+    }
+    const resultadoCitas = await pool.query(SQLquery);
+    return resultadoCitas.rows;
+  } catch (error) {
+    console.log(`Error en query consulta citas de un rut:\n${error}`);
+    return error.code;
+  }
+}
+
 // Exportando funciones
-module.exports = { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo, nuevaCita }
+module.exports = { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo, nuevaCita, consultaAsesor, consultaCitas, consultaSemaforos, consultaCita, actualizarCita, consultaCitasRut }

@@ -1,0 +1,87 @@
+<div class="accordion mb-3" id="accordionPanelsStayOpenExample">
+  <div class="accordion-item mb-3">
+    <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+        Historial de Asesorías |<i class="text-danger mx-2"> Pendientes {{totales.pendientes}}</i>|<i class="text-success mx-2">Finalizadas {{totales.finalizadas}}</i>|<i class="text-dark mx-2">Total {{totales.totalCitas}}</i>
+      </button>
+    </h2>
+    <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+      <div class="accordion-body">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Id Cita</th>
+              <th scope="col">Fecha</th>
+              <th scope="col">Hora</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Comentario Cliente</th>
+              <th scope="col">Comentario Asesor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each citas}}
+              <tr>
+                <td>{{this.idcita}}</a></td>
+                <td>{{this.fecha}}</a></td>
+                <td>{{this.hora}}</td>
+                {{#if this.estado}}
+                  <td class="text-success">Finalizada</td>
+                {{else}}
+                  <td class="text-danger">Pendiente</td>
+                {{/if}}
+                <td>{{this.comentario}}</td>
+                <td>{{this.comentarioasesor}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
+        Historial de Semáforos | {{totales.totalSemaforos}}
+      </button>
+    </h2>
+    <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingTwo">
+      <div class="accordion-body">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Id Semáforo</th>
+              <th scope="col">Rut</th>
+              <th scope="col">Ingresos</th>
+              <th scope="col">Cuotas</th>
+              <th scope="col">Deudas</th>
+              <th scope="col">Activos</th>
+              <th scope="col">Carga</th>
+              <th scope="col">Leverage</th>
+              <th scope="col">Patrimonio</th>
+              <th scope="col">Fecha/Hora</th>
+              <th scope="col">Semáforo</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each indicadores}}
+              <tr>
+                <td>{{this.id}}</a></td>
+                <td>{{this.idrut}}</a></td>
+                <td>{{this.ingreso}}</td>
+                <td>{{this.cuota}}</td>
+                <td>{{this.deuda}}</td>
+                <td>{{this.activo}}</td>
+                <td>{{this.carga}}</td>
+                <td>{{this.leverage}}</td>
+                <td>{{this.patrimonio}}</td>
+                <td>{{this.fechahora}}</td>
+                <td class="bg-{{this.color}}">{{this.texto}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

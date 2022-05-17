@@ -1,58 +1,51 @@
-<div class="col-sm-12 mb-3">
-  <div class="card">
-    <div class="card-body">
-      <h5 class="card-title mb-3">Mis Datos Personales</h5>        
-      <form method="post" action="/dashboard/datos-personales" enctype="multipart/form-data">
-        <div class="form-group row w-80 m-auto">
-          <div class="form-group col-12 col-sm-6 mb-3">
-            <label>Rut</label>
-            <input id="rut" name="rut" class="form-control m-auto text-center" value="{{cliente.rut}}" readonly/>
-          </div>
-          <div class="form-group col-12 col-sm-6 mb-3">
-            <label>Email</label>
-            <input id="email" name="email" class="form-control m-auto text-center" value="{{cliente.email}}"/>
-          </div>
-          <div class="form-group col-12 col-sm-6 mb-3">
-            <label>Apellido Paterno</label>
-            <input id="apellido_paterno" name="apellido_paterno" class="form-control m-auto text-center" value="{{cliente.apellidopaterno}}"/>
-          </div>
-          <div class="form-group col-12 col-sm-6 mb-3">
-            <label>Apellido Materno</label>
-            <input id="apellido_materno" name="apellido_materno" class="form-control m-auto text-center" value="{{cliente.apellidomaterno}}"/>
-          </div>
-          <div class="form-group col-12 col-sm-6 mb-3">
-            <label>Nombres</label>
-            <input id="nombre" name="nombre" class="form-control m-auto text-center" value="{{cliente.nombre}}"/>
-          </div>
-          <div class="form-group col-12 col-sm-6 mb-3">
-            <label>Fecha Nacimiento</label>
-            <input id="fecha_nacimiento" name="fecha_nacimiento" type="date" value="{{cliente.fechanacimiento}}" class="form-control m-auto text-center"/>
-          </div>
-          <div class="form-group col-12 col-sm-6 mb-3">
-            <label>Número de Celular</label>
-            <input id="celular" name="celular" class="form-control m-auto text-center" value="{{cliente.celular}}"/>
-          </div>
-          <div class="form-group col-12 col-sm-6 mb-3">
-            <label>Comuna de Residencia</label>
-            <input id="comuna" name="comuna" class="form-control m-auto text-center" value="{{cliente.comuna}}"/>
-          </div>
-          <div class="form-group col-12 col-sm-6 mb-3">
-            <label>Password</label>
-            <input id="password" name="password" type="password" class="form-control m-auto text-center" value="{{cliente.password}}"/>
-          </div>
-          <div class="form-group col-12 col-sm-6 mb-3">
-            <label>Repita la Password</label>
-            <input id="rep_password" name="rep_password" type="password" class="form-control m-auto text-center" value="{{cliente.password}}"/>
-          </div>
-          <div class="form-group col-12 col-sm-12 mb-3">
-            <label>Cambiar Foto... </label>
-            <input id="foto" name="foto" type="file"/>
-            <input id="nombre_foto" name="nombre_foto" type="hidden" value="{{cliente.foto}}"/>
-          </div>
-        </div>
-        <button class="btn btn-success bi bi-arrow-up-circle-fill">...actualizar</button>
-        <a href="/dashboard" class="btn btn-danger bi bi-skip-backward-fill">...volver</a>
-      </form>
+<form method="post" action="/dashboard/datos-personales" enctype="multipart/form-data">
+  <div class="form-group row w-80 m-auto">
+    <div class="form-group col-12 col-sm-6 mb-3">
+      <label>Rut</label>
+      <input id="rut" name="rut" class="form-control m-auto text-center" value="{{cliente.rut}}" readonly/>
+    </div>
+    <div class="form-group col-12 col-sm-6 mb-3">
+      <label>Email</label>
+      <input id="email" name="email" class="form-control m-auto text-center" value="{{cliente.email}}"/>
+    </div>
+    <div class="form-group col-12 col-sm-6 mb-3">
+      <label>Apellido Paterno</label>
+      <input id="apellido_paterno" name="apellido_paterno" class="form-control m-auto text-center" value="{{cliente.apellidopaterno}}"/>
+    </div>
+    <div class="form-group col-12 col-sm-6 mb-3">
+      <label>Apellido Materno</label>
+      <input id="apellido_materno" name="apellido_materno" class="form-control m-auto text-center" value="{{cliente.apellidomaterno}}"/>
+    </div>
+    <div class="form-group col-12 col-sm-6 mb-3">
+      <label>Nombres</label>
+      <input id="nombre" name="nombre" class="form-control m-auto text-center" value="{{cliente.nombre}}"/>
+    </div>
+    <div class="form-group col-12 col-sm-6 mb-3">
+      <label>Fecha Nacimiento</label>
+      <input id="fecha_nacimiento" name="fecha_nacimiento" type="date" value="{{cliente.fechanacimiento}}" class="form-control m-auto text-center"/>
+    </div>
+    <div class="form-group col-12 col-sm-6 mb-3">
+      <label>Número de Celular</label>
+      <input id="celular" name="celular" class="form-control m-auto text-center" value="{{cliente.celular}}"/>
+    </div>
+    <div class="form-group col-12 col-sm-6 mb-3">
+      <label>Comuna de Residencia</label>
+      <input id="comuna" name="comuna" class="form-control m-auto text-center" value="{{cliente.comuna}}"/>
+    </div>
+    <div class="form-group col-12 col-sm-6 mb-3">
+      <label>Password</label>
+      <input id="password" name="password" type="password" class="form-control m-auto text-center" value="{{cliente.password}}"/>
+    </div>
+    <div class="form-group col-12 col-sm-6 mb-3">
+      <label>Repita la Password</label>
+      <input id="rep_password" name="rep_password" type="password" class="form-control m-auto text-center" value="{{cliente.password}}"/>
+    </div>
+    <div class="form-group col-12 col-sm-12 mb-3">
+      <label>Cambiar Foto... </label>
+      <input id="foto" name="foto" type="file"/>
+      <input id="nombre_foto" name="nombre_foto" type="hidden" value="{{cliente.foto}}"/>
     </div>
   </div>
-</div>
+  <button class="btn btn-success bi bi-arrow-up-circle-fill">...actualizar</button>
+  <a href="/dashboard" class="btn btn-danger bi bi-skip-backward-fill">...volver</a>
+</form>
