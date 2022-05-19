@@ -150,7 +150,7 @@ async function consultaSemaforos(idrut) {
       text: `SELECT * FROM indicadores WHERE idrut = $1 ORDER BY fechahora DESC;`,
       values: [idrut]
     }
-    
+
     const resultadoSemaforos = await pool.query(SQLquery);
 
     return resultadoSemaforos.rows;
@@ -199,7 +199,7 @@ async function actualizarCita(cita) {
 async function consultaCitasRut(idrut) {
   try {
     const SQLquery = {
-      text: `SELECT * FROM citas WHERE idrut=$1  ORDER BY fecha ASC, hora ASC`,
+      text: `SELECT * FROM citas WHERE idrut=$1  ORDER BY fecha DESC, hora DESC`,
       values: [idrut]
     }
     const resultadoCitas = await pool.query(SQLquery);
