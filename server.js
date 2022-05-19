@@ -1,5 +1,5 @@
 // Importación de funciones con las querys que procesan sobre la BD
-const { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo, nuevaCita, consultaAsesor, consultaCitas, consultaSemaforos, consultaCita, actualizarCita,consultaCitasRut } = require("./querys");
+const { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo, nuevaCita, consultaAsesor, consultaCitas, consultaSemaforos, consultaCita, actualizarCita,consultaCitasRut, eliminarCliente } = require("./querys");
 
 // Configuración dependencia express
 const express = require("express");
@@ -161,8 +161,10 @@ app.get("/dashboard/datos-personales", validarToken, async (req, res) => {
 
 app.post("/registro", async (req, res) => {
   const { rut, email, apellido_paterno, apellido_materno, nombre, fecha_nacimiento, celular, comuna, password, rep_password } = req.body;
+  const resultadoCliente = await consultaCliente(rut);
 
   if (password === rep_password) {
+
     const datosCliente = {
       rut: rut,
       email: email,
@@ -176,20 +178,34 @@ app.post("/registro", async (req, res) => {
       estado: true,
       nombre_foto: "foto_generica.png"
     };
-    
-    if (req.files) {
-      const { foto } = req.files;
-      datosCliente.nombre_foto = `${rut}_${uuidv4()}.png`;
-      foto.mv(`${__dirname}/assets/img/perfil/${datosCliente.nombre_foto}`);
-    }
-  
-    const resultado = await nuevoCliente(datosCliente);
-    
-    if (resultado === "23505") {
-      res.send(`<script>alert("El rut ya se encuentra registrado"); window.location.href = "/registro"; </script>`);
+
+    if (resultadoCliente.length > 0  && resultadoCliente[0].estado === false) {
+
+      if (req.files) {
+        const { foto } = req.files;
+        datosCliente.nombre_foto = `${rut}_${uuidv4()}.png`;
+        foto.mv(`${__dirname}/assets/img/perfil/${datosCliente.nombre_foto}`);
+      };
+
+      const resultado = await actualizarCliente(datosCliente);
+      res.send(`<script>alert("Cuenta creada con éxito"); window.location.href = "/login"; </script>`);
+
+    } else if (resultadoCliente.length > 0  && resultadoCliente[0].estado === true) {
+      res.send(`<script>alert("Rut ya registrado"); window.location.href = "/login"; </script>`);
+      
     } else {
-      res.redirect("/login");
+
+      if (req.files) {
+        const { foto } = req.files;
+        datosCliente.nombre_foto = `${rut}_${uuidv4()}.png`;
+        foto.mv(`${__dirname}/assets/img/perfil/${datosCliente.nombre_foto}`);
+      };
+
+      const resultado = await nuevoCliente(datosCliente);
+      res.send(`<script>alert("Cuenta creada con éxito}"); window.location.href = "/login"; </script>`);
     }
+    
+
   } else {
     res.send(`<script>alert("Password y Repetir Password deben ser iguales"); window.location.href = "/registro"; </script>`);
   };
@@ -200,7 +216,7 @@ app.post("/login", async (req, res) => {
   const { rut, password } = req.body;
   const resultadoCliente = await consultaCliente(rut);
   if (resultadoCliente.length > 0 && resultadoCliente !== undefined) {
-    if (rut === resultadoCliente[0].rut && password === resultadoCliente[0].password) {
+    if (rut === resultadoCliente[0].rut && password === resultadoCliente[0].password && resultadoCliente[0].estado === true) {
       token = generadorAccesoToken(resultadoCliente[0]);
       res.redirect("/dashboard")
     } else {
@@ -452,6 +468,17 @@ app.post("/dashboard-asesor/cerrar-cita", validarToken, async (req, res) => {
     res.send(`<script>alert("Actualización de la cita guardada con éxito"); window.location.href = "/dashboard-asesor"; </script>`);
   } else {
     res.send(`<script>alert("Error al actualizar cita: ${error.code}"); window.location.href = "#"; </script>`);
+  };
+
+});
+
+app.get("/dashboard/eliminar", validarToken, async (req, res) => {
+  const resultadoEliminar = await eliminarCliente(datosDecoded.rut);
+
+  if (resultadoEliminar) {
+    res.send(`<script>alert("Eliminación de la cuenta exitosa"); window.location.href = "/"; </script>`);
+  } else {
+    res.send(`<script>alert("Error al eliminar cuenta ${resultadoEliminar}"); window.location.href = "#"; </script>`);
   };
 
 });

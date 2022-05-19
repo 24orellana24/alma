@@ -69,8 +69,8 @@ async function actualizarCliente(cliente) {
     const SQLquery = {
       text: `
       UPDATE clientes
-      SET nombre=$1, apellidopaterno=$2, apellidomaterno=$3, fechanacimiento=$4, email=$5, celular=$6, comuna=$7, foto=$8, password=$9 WHERE rut=$10 RETURNING *;`,
-      values: [cliente.nombre, cliente.apellido_paterno, cliente.apellido_materno, cliente.fecha_nacimiento, cliente.email, cliente.celular, cliente.comuna, cliente.nombre_foto, cliente.password, cliente.rut]
+      SET nombre=$1, apellidopaterno=$2, apellidomaterno=$3, fechanacimiento=$4, email=$5, celular=$6, comuna=$7, foto=$8, password=$9, estado=$10 WHERE rut=$11 RETURNING *;`,
+      values: [cliente.nombre, cliente.apellido_paterno, cliente.apellido_materno, cliente.fecha_nacimiento, cliente.email, cliente.celular, cliente.comuna, cliente.nombre_foto, cliente.password, true, cliente.rut]
     }
     const resultado = await pool.query(SQLquery);
     return resultado.rows;
@@ -210,5 +210,24 @@ async function consultaCitasRut(idrut) {
   }
 }
 
+// Función para que el cliente pueda eliminar su cuenta
+async function eliminarCliente(rut) {
+  try {
+    const SQLquery = {
+      text: `
+      UPDATE clientes
+      SET estado=$1
+      WHERE rut=$2
+      RETURNING *;`,
+      values: [false, rut]
+    }
+    const resultadoEliminar = await pool.query(SQLquery);
+    return resultadoEliminar.rows;
+  } catch (error) {
+    console.log(`Error en query eliminar cuenta de un rut:\n${error}`);
+    return error.code;
+  }
+}
+
 // Exportando funciones
-module.exports = { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo, nuevaCita, consultaAsesor, consultaCitas, consultaSemaforos, consultaCita, actualizarCita, consultaCitasRut }
+module.exports = { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo, nuevaCita, consultaAsesor, consultaCitas, consultaSemaforos, consultaCita, actualizarCita, consultaCitasRut, eliminarCliente }
