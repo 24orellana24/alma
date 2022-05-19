@@ -300,39 +300,45 @@ app.post("/dashboard/calcular-semaforo", validarToken, async (req, res) => {
 });
 
 app.post("/dashboard/datos-personales", validarToken, async (req, res) => {
-  const { rut, email, apellido_paterno, apellido_materno, nombre, fecha_nacimiento, celular, comuna, password, nombre_foto } = req.body;
-  const datosCliente = {
-    rut: rut,
-    email: email,
-    apellido_paterno: apellido_paterno,
-    apellido_materno: apellido_materno,
-    nombre: nombre,
-    fecha_nacimiento: fecha_nacimiento,
-    celular: celular,
-    comuna: comuna,
-    password: password,
-    nombre_foto: nombre_foto
-  };
-  
-  if (req.files) {
-    if (datosCliente.nombre_foto !== "foto_generica.png") {
-      fs.unlink(`${__dirname}/assets/img/perfil/${datosCliente.nombre_foto}`, (err) => {
-        if (err) {
-          const { code } = err;
-          res.send(`<script>alert("Error al actualizar foto de perfil: ${code}"); window.location.href = "/dashboard/datos-personales"; </script>`);
-        }
-      });
+  const { rut, email, apellido_paterno, apellido_materno, nombre, fecha_nacimiento, celular, comuna, password, rep_password, nombre_foto } = req.body;
+  if (password === rep_password) {
+
+    const datosCliente = {
+      rut: rut,
+      email: email,
+      apellido_paterno: apellido_paterno,
+      apellido_materno: apellido_materno,
+      nombre: nombre,
+      fecha_nacimiento: fecha_nacimiento,
+      celular: celular,
+      comuna: comuna,
+      password: password,
+      nombre_foto: nombre_foto
+    };
+    
+    if (req.files) {
+      if (datosCliente.nombre_foto !== "foto_generica.png") {
+        fs.unlink(`${__dirname}/assets/img/perfil/${datosCliente.nombre_foto}`, (err) => {
+          if (err) {
+            const { code } = err;
+            res.send(`<script>alert("Error al actualizar foto de perfil: ${code}"); window.location.href = "/dashboard/datos-personales"; </script>`);
+          }
+        });
+      }
+      const { foto } = req.files;
+      datosCliente.nombre_foto = `${rut}_${uuidv4()}.png`;
+      foto.mv(`${__dirname}/assets/img/perfil/${datosCliente.nombre_foto}`);
     }
-    const { foto } = req.files;
-    datosCliente.nombre_foto = `${rut}_${uuidv4()}.png`;
-    foto.mv(`${__dirname}/assets/img/perfil/${datosCliente.nombre_foto}`);
-  }
+  
+    const resultado = await actualizarCliente(datosCliente);
+  
+    if (resultado) {
+      res.send(`<script>alert("Datos personales actualizados"); window.location.href = "/dashboard/datos-personales"; </script>`);
+    }
 
-  const resultado = await actualizarCliente(datosCliente);
-
-  if (resultado) {
-    res.send(`<script>alert("Datos personales actualizados"); window.location.href = "/dashboard/datos-personales"; </script>`);
-  }
+  } else {
+    res.send(`<script>alert("Password y Repetir Password deben ser iguales"); window.location.href = "/dashboard/datos-personales"; </script>`);
+  };
 
 });
 
