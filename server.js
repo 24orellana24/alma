@@ -1,5 +1,7 @@
-// Importación de funciones con las querys que procesan sobre la BD
+// Importación de funciones
 const { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo, nuevaCita, consultaAsesor, consultaCitas, consultaSemaforos, consultaCita, actualizarCita,consultaCitasRut, eliminarCliente } = require("./querys");
+
+//const { generadorAccesoToken } = require("./funciones");
 
 // Configuración dependencia express
 const express = require("express");
@@ -37,6 +39,7 @@ app.use(expressFileUpload({
 // Configuración dependencia body parser
 const bodyParser = require("body-parser");
 const { get } = require("http");
+const { now } = require("moment");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -48,10 +51,15 @@ app.use("/bootstrap-icons", express.static(`${__dirname}/node_modules/bootstrap-
 app.use(express.static(`${__dirname}/assets`));
 
 // Rutas de ejecución
+let fechaMiIndicador = "01-01-1900"
+let fechaDeHoy = moment(new Date).format("DD-MM-YYYY")
 let indicadoresEconomicos;
 app.get("/", async (req, res) => {
-  const { data } = await axios.get("https://mindicador.cl/api");
-  indicadoresEconomicos = data;
+  if (fechaDeHoy != fechaMiIndicador) {
+    const { data } = await axios.get("https://mindicador.cl/api");
+    indicadoresEconomicos = data
+    fechaMiIndicador = moment(indicadoresEconomicos.fecha).format("DD-MM-YYYY"); 
+  }
   res.render("index", {
     layout: "index",
     indicadoresEconomicos: indicadoresEconomicos
@@ -130,18 +138,18 @@ app.get("/dashboard", validarToken, async (req, res) => {
   });
 });
 
-function generadorAccesoToken(cliente) {
-  return jwt.sign(cliente, secretKey, {expiresIn: "15m"})  
-}
-
 let token = "";
 let datosDecoded = {};
+
+function generadorAccesoToken(cliente) {
+  return jwt.sign(cliente, secretKey, {expiresIn: "10m"})  
+}
 
 function validarToken(req, res, next) {
   if (!token) res.send("Token no generado función validarToken");
   jwt.verify(token, secretKey, (error, decoded) => {
     if (error) {
-      res.send("Acceso Denegado al validarToken");
+      res.send(`<script>alert("Acceso Denegado al validar Token"); window.location.href = "/"; </script>`);
     } else {
       datosDecoded = decoded;
       next();
@@ -191,7 +199,7 @@ app.post("/registro", async (req, res) => {
       res.send(`<script>alert("Cuenta creada con éxito"); window.location.href = "/login"; </script>`);
 
     } else if (resultadoCliente.length > 0  && resultadoCliente[0].estado === true) {
-      res.send(`<script>alert("Rut ya registrado"); window.location.href = "/login"; </script>`);
+      res.send(`<script>alert("Rut ya registrado"); window.location.href = "/"; </script>`);
       
     } else {
 
@@ -202,7 +210,7 @@ app.post("/registro", async (req, res) => {
       };
 
       const resultado = await nuevoCliente(datosCliente);
-      res.send(`<script>alert("Cuenta creada con éxito}"); window.location.href = "/login"; </script>`);
+      res.send(`<script>alert("Cuenta creada con éxito"); window.location.href = "/login"; </script>`);
     }
     
 
@@ -484,4 +492,4 @@ app.get("/dashboard/eliminar", validarToken, async (req, res) => {
 });
 
 // Inicializando servidor en puerto 3000
-app.listen(3000, () => console.log("Servidor activo en puerto 3000"))
+app.listen(3000, () => console.log("Servidor activo en puerto 3000"));
