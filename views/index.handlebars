@@ -2,37 +2,33 @@
 
 <html lang="es">
 
-<head>
-{{> cabecera}}
-</head>
-  
-<body class="bg-light text-center mx-3">
+  <head>
 
-  {{> menu }}
+    {{> cabecera}}
 
-  <div class="card mb-3" style="max-width: 100%">
-    <div class="row g-0">
-      <div class="col-md-6">
-        <div class="card-body">
-          <div class="my-5 bg-light border border-3 border-success rounded-pill">
-            <h1 class="my-3">...AlmA finan<i class="bi bi-coin"></i>iera...</h1>
+  </head>
+    
+  <body class="bg-light text-center">
+
+    {{> menu }}
+
+    <div class="card mx-3 mb-3">
+      <div class="row g-0">
+        <div class="col-md-6">
+          <div class="card-body">
+            <h1 class="card-title mb-3">...ALMA finan<i class="bi bi-coin"></i>iera...</h5>
+            <p class="card-text">En ALMA Financiera, queremos ayudarte a que conozcas como está tu nivel de endeudamiento personal, para ello, al igual que las empresas, exiten algunos indicadores o ratios financieros que pueden ser de mucha utilidad.</p>
+            <p class="card-text"><a href="/registro">Regístrate</a> en nuestra plataforma, ingresa tus datos financieros y nuestro semáforo te indicará si tu nivel de deuda es bueno, regular o malo. Si necesitas una asesoría más detallada, agenda una cita y te contactaremos para el día y la hora que nos indiques.</p>
           </div>
-          <p class="card-text m-4 fs-5">
-            En ALMA Financiera, queremos ayudarte a que conozcas como está tu nivel de endeudamiento personal, para ello, al igual que las empresas, exiten algunos indicadores o ratios financieros que pueden ser de mucha utilidad.
-          </p>
-          <p class="card-text m-4 fs-5">
-            <a href="/registro">Regístrate</a> en nuestra plataforma, ingresa tus datos financieros y nuestro semáforo te indicará si tu nivel de deuda es bueno, regular o malo. Si necesitas una asesoría más detallada, agenda una cita y te contactaremos para el día y la hora que nos indiques.
-          </p>
+        </div>
+        <div class="col-md-6">
+          <img src="/img/finanzas.jpeg" class="img-fluid rounded-start" alt="...">
         </div>
       </div>
-      <div class="col-md-6 p-3">
-        {{> carrusel}}
-      </div>
     </div>
-  </div>
 
-  {{> pie}}
+    {{> pie}}
 
-</body>
+  </body>
 
 </html>

@@ -2,28 +2,19 @@
 
 <html lang="es">
 
-<head>
-{{> cabecera}}
-</head>
-  
-<body class="mx-3 bg-light text-center">
-
-  {{> menu }}
-
-  {{> bienvenida}}
-
-  <div class="row mb-3">
-
-    {{> datosFinancieros}}
-
-    {{> datosSemaforo}}
-
-  </div>
-  
-  {{> listaIndicadores}}
-
-  {{> pie }}
-
-</body>
+  <head>
+  {{> cabecera}}
+  </head>
+    
+  <body class="bg-light text-center">
+    {{> menu }}
+    {{> bienvenida}}
+    <div class="row mx-1 mb-3">
+      {{> datosFinancieros}}
+      {{> datosSemaforo}}
+    </div>
+    {{> listaIndicadores}}
+    {{> pie }}
+  </body>
 
 </html>

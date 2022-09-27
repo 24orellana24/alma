@@ -6,20 +6,32 @@
       <form method="post" action="/dashboard/agendar-asesoria" enctype="multipart/form-data">
         <div class="form-group row w-100 m-auto">
           <div class="form-group col-12 col-sm-6 mb-3">
-            <label>Carga Financiera (%)</label>
-            <input id="carga" name="carga" class="form-control m-auto text-center" value="{{semaforo.carga}}" readonly/>
+            <label>Carga Financiera</label>
+            <div class="input-group">
+              <span class="input-group-text" id="basic-addon1"><i class="bi bi-percent"></i></span>
+              <input id="carga" name="carga" class="form-control m-auto text-center" value="{{semaforo.carga}}" readonly/>
+            </div>
           </div>
           <div class="form-group col-12 col-sm-6 mb-3">
-            <label>Leverage (veces renta)</label>
-            <input id="leverage" name="leverage" class="form-control m-auto text-center" value="{{semaforo.leverage}}" readonly/>
+            <label>Leverage</label>
+            <div class="input-group">
+              <span class="input-group-text" id="basic-addon1">vr</span>
+              <input id="leverage" name="leverage" class="form-control m-auto text-center" value="{{semaforo.leverage}}" readonly/>
+            </div>
           </div>
           <div class="form-group col-12 col-sm-6 mb-3">
-            <label>Patrimonio ($)</label>
-            <input id="patrimonio" name="patrimonio" class="form-control m-auto text-center" value="{{semaforo.patrimonio}}" readonly/>
+            <label>Patrimonio</label>
+            <div class="input-group">
+              <span class="input-group-text" id="basic-addon1"><i class="bi bi-currency-dollar"></i></span>
+              <input id="patrimonio" name="patrimonio" class="form-control m-auto text-center" value="{{semaforo.patrimonio}}" readonly/>
+            </div>
           </div>
           <div class="form-group col-12 col-sm-6 mb-3">
             <label>Fecha y Hora</label>
-            <input id="fecha_hora" name="fecha_hora" type="datetime" class="form-control m-auto text-center" value="{{semaforo.fechahora}}" readonly/>
+            <div class="input-group">
+              <span class="input-group-text" id="basic-addon1"><i class="bi bi-clock"></i></span>
+              <input id="fecha_hora" name="fecha_hora" type="datetime" class="form-control m-auto text-center" value="{{semaforo.fechahora}}" readonly/>
+            </div>
           </div>
         </div>
         <button class="btn btn-success my-3 bi bi-headset">...asesoría</button>

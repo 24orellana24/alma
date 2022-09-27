@@ -1,5 +1,5 @@
-// Importación de funciones
-const { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo, nuevaCita, consultaAsesor, consultaCitas, consultaSemaforos, consultaCita, actualizarCita,consultaCitasRut, eliminarCliente } = require("./querys");
+// Importación de funciones para operar con la base de datos
+const { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo, nuevaCita, consultaAsesor, consultaCitas, consultaSemaforos, consultaCita, actualizarCita, consultaCitasRut, eliminarCliente } = require("./my_modules/querys");
 
 //const { generadorAccesoToken } = require("./funciones");
 
@@ -50,19 +50,37 @@ app.use("/bootstrap-icons", express.static(`${__dirname}/node_modules/bootstrap-
 // Configuración ruta de lectura de archivos propios del proyecto
 app.use(express.static(`${__dirname}/assets`));
 
+// Configuración dependencias para validar rut
+const { validateRUT, getCheckDigit } = require("validar-rut");
+
+// Configuración dependencias para dar formato a los números
+const numeral = require('numeral');
+//const { format } = require("path");
+
 // Rutas de ejecución
-let fechaMiIndicador = "01-01-1900"
-let fechaDeHoy = moment(new Date).format("DD-MM-YYYY")
+let fechaMiIndicador = "01-01-1900";
 let indicadoresEconomicos;
 app.get("/", async (req, res) => {
-  if (fechaDeHoy != fechaMiIndicador) {
-    const { data } = await axios.get("https://mindicador.cl/api");
-    indicadoresEconomicos = data
-    fechaMiIndicador = moment(indicadoresEconomicos.fecha).format("DD-MM-YYYY"); 
+  const fechaDeHoy = moment(new Date).format("DD-MM-YYYY")
+  if (fechaDeHoy !== fechaMiIndicador) {
+    try {
+      const { data } = await axios.get("https://mindicador.cl/api");
+      indicadoresEconomicos = {
+        uf: numeral(data.uf.valor).format('$0,0.00'),
+        dolar: numeral(data.dolar.valor).format('$0,0.00'),
+        euro: numeral(data.euro.valor).format('$0,0.00'),
+        utm: numeral(data.utm.valor).format('$0,0.00'),
+        ipc: numeral(data.ipc.valor).format('0.00'),
+      };
+      fechaMiIndicador = moment(indicadoresEconomicos.fecha).format("DD-MM-YYYY");
+      console.log("Consulta exitosa a API mindicador.cl");
+    } catch (error) {
+      console.log("Error al consultsar API mindicador.cl");
+    }
   }
   res.render("index", {
     layout: "index",
-    indicadoresEconomicos: indicadoresEconomicos
+    indicadoresEconomicos: indicadoresEconomicos,
   });
 });
 
@@ -89,6 +107,7 @@ app.get("/login-asesor", async (req, res) => {
 
 let resultadoCitasRut;
 let resultadoSemaforos;
+
 app.get("/dashboard", validarToken, async (req, res) => {
   const resultadoCliente = await consultaCliente(datosDecoded.rut);
   resultadoCitasRut = await consultaCitasRut(datosDecoded.rut);
@@ -98,7 +117,9 @@ app.get("/dashboard", validarToken, async (req, res) => {
   resultadoCitasRut.forEach(element => element.fecha = moment(element.fecha).format("DD-MM-YYYY"));
 
   if (resultadoSemaforo.length > 0) {
+    console.log(resultadoSemaforo);
     resultadoSemaforo = [calcularSemaforo(resultadoSemaforo[0].ingreso, resultadoSemaforo[0].cuota, resultadoSemaforo[0].deuda, resultadoSemaforo[0].activo)];
+    console.log(resultadoSemaforo);
   } else {
     resultadoSemaforo = [{
       ingreso: 0,
@@ -134,7 +155,8 @@ app.get("/dashboard", validarToken, async (req, res) => {
     citas: resultadoCitasRut,
     indicadores: resultadoSemaforos,
     totales: {"totalCitas": totalCitas = resultadoCitasRut.length, "totalSemaforos": totalSemaforos = resultadoSemaforos.length},
-    indicadoresEconomicos: indicadoresEconomicos
+    indicadoresEconomicos: indicadoresEconomicos,
+    prueba: "none"
   });
 });
 
@@ -170,6 +192,8 @@ app.get("/dashboard/datos-personales", validarToken, async (req, res) => {
 app.post("/registro", async (req, res) => {
   const { rut, email, apellido_paterno, apellido_materno, nombre, fecha_nacimiento, celular, comuna, password, rep_password } = req.body;
   const resultadoCliente = await consultaCliente(rut);
+
+  //console.log(`Rut: ${rut} | Dígito calculado: ${getCheckDigit(rut)}`);
 
   if (password === rep_password) {
 
@@ -213,7 +237,6 @@ app.post("/registro", async (req, res) => {
       res.send(`<script>alert("Cuenta creada con éxito"); window.location.href = "/login"; </script>`);
     }
     
-
   } else {
     res.send(`<script>alert("Password y Repetir Password deben ser iguales"); window.location.href = "/registro"; </script>`);
   };
@@ -262,7 +285,6 @@ app.post("/dashboard/agendar-asesoria", validarToken, async (req, res) => {
 });
 
 let datosSemaforo;
-
 function calcularSemaforo(ingreso, cuota, deuda, activo) {
   let carga = 0;
   let leverage = 0;
@@ -273,7 +295,7 @@ function calcularSemaforo(ingreso, cuota, deuda, activo) {
 
   if (ingreso > 0) {
     carga = (cuota / ingreso).toFixed(4);
-    leverage = (deuda / ingreso).toFixed(4);
+    leverage = (deuda / ingreso).toFixed(2);
     patrimonio = activo - deuda;
     if (carga <= (1/4)) {
       evaluacion = 1;
@@ -295,15 +317,16 @@ function calcularSemaforo(ingreso, cuota, deuda, activo) {
     cuota: Number(cuota),
     deuda: Number(deuda),
     activo: Number(activo),
-    carga: carga,
-    leverage: leverage,
-    patrimonio: patrimonio,
+    carga: Number(carga * 100),
+    leverage: Number(leverage),
+    patrimonio: Number(patrimonio),
     fechahora: moment(Date.now()).format("DD/MM/YYYY HH:mm:ss"),
     semaforo: evaluacion,
     color: color,
     texto: texto,
     rutCliente: datosDecoded.rut
   };
+  console.log(datosSemaforo.ingreso, ingreso);
   return datosSemaforo;
 }
 

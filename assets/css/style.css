@@ -20,6 +20,11 @@ footer {
   margin-top: auto;
 }
 
+.prueba-123 {
+  font-size: 50px;
+  display: block;
+}
+
 @media (min-width: 1024px) {
   .mi-carrusel-ver {
     display: inline-block;
