@@ -44,8 +44,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Configuración ruta de acceso para consumir framework boostrap
-app.use("/bootstrap", express.static(`${__dirname}/node_modules_bootstrap/bootstrap/dist/css`));
-app.use("/bootstrap-icons", express.static(`${__dirname}/node_modules_bootstrap/bootstrap-icons/font`));
+app.use("/bootstrap", express.static(`${__dirname}/node_modules/bootstrap/dist/css`));
+app.use("/bootstrap-icons", express.static(`${__dirname}/node_modules/bootstrap-icons/font`));
 
 // Configuración ruta de lectura de archivos propios del proyecto
 app.use(express.static(`${__dirname}/assets`));
@@ -192,8 +192,6 @@ app.get("/dashboard/datos-personales", validarToken, async (req, res) => {
 app.post("/registro", async (req, res) => {
   const { rut, email, apellido_paterno, apellido_materno, nombre, fecha_nacimiento, celular, comuna, password, rep_password } = req.body;
   const resultadoCliente = await consultaCliente(rut);
-
-  //console.log(`Rut: ${rut} | Dígito calculado: ${getCheckDigit(rut)}`);
 
   if (password === rep_password) {
 
