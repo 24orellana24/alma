@@ -44,8 +44,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Configuración ruta de acceso para consumir framework boostrap
-app.use("/bootstrap", express.static(`${__dirname}/node_modules/bootstrap/dist/css`));
-app.use("/bootstrap-icons", express.static(`${__dirname}/node_modules/bootstrap-icons/font`));
+app.use("/bootstrap", express.static(`${__dirname}/node_modules_bootstrap/bootstrap/dist/css`));
+app.use("/bootstrap-icons", express.static(`${__dirname}/node_modules_bootstrap/bootstrap-icons/font`));
 
 // Configuración ruta de lectura de archivos propios del proyecto
 app.use(express.static(`${__dirname}/assets`));
