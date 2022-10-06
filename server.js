@@ -1,5 +1,5 @@
 // Importación de funciones para operar con la base de datos
-const { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo, nuevaCita, consultaAsesor, consultaCitas, consultaSemaforos, consultaCita, actualizarCita, consultaCitasRut, eliminarCliente } = require("./my_modules/querys");
+const { nuevoCliente, consultaCliente, nuevoSemaforo, actualizarCliente, consultaSemaforo, nuevaCita, consultaAsesor, consultaCitas, consultaSemaforos, consultaCita, actualizarCita, consultaCitasRut, eliminarCliente } = require("./assets/js/querys");
 
 //const { generadorAccesoToken } = require("./funciones");
 
@@ -43,15 +43,8 @@ const { now } = require("moment");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// Configuración ruta de acceso para consumir framework boostrap
-//app.use("/bootstrap", express.static(`${__dirname}/node_modules/bootstrap/dist/css`));
-//app.use("/bootstrap-icons", express.static(`${__dirname}/node_modules/bootstrap-icons/font`));
-
 // Configuración ruta de lectura de archivos propios del proyecto
 app.use(express.static(`${__dirname}/assets`));
-
-// Configuración dependencias para validar rut
-const { validateRUT, getCheckDigit } = require("validar-rut");
 
 // Configuración dependencias para dar formato a los números
 const numeral = require('numeral');
