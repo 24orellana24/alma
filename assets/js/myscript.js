@@ -32,13 +32,13 @@ rutIngresado.addEventListener("blur", () => {
       alertasRegistro.style.display = "none";
     } else {
       alertasRegistro.style.display = "";
-      alertasRegistro.innerHTML = "Formato rut erroneo: el rut debe ser sin puntos, con guión y dígito verificador. Si el dígito verificador es K, debe ser ingresado con MAYÚSCULA. Ej: 12345678-K";
+      alertasRegistro.innerHTML = <p><i class="bi bi-exclamation-circle"></i> Formato rut erroneo: el rut debe ser sin puntos, con guión y dígito verificador. Si el dígito verificador es K, debe ser ingresado con MAYÚSCULA. Ej: 12345678-K</p>;
       rutIngresado.focus();
     }
 
   } else {
     alertasRegistro.style.display = "";
-    alertasRegistro.innerHTML = "Formato rut erroneo: el rut debe ser sin puntos, con guión y dígito verificador. Si el dígito verificador es K, debe ser ingresado con MAYÚSCULA. Ej: 12345678-K";
+    alertasRegistro.innerHTML = <p><i class="bi bi-exclamation-circle"></i> Formato rut erroneo: el rut debe ser sin puntos, con guión y dígito verificador. Si el dígito verificador es K, debe ser ingresado con MAYÚSCULA. Ej: 12345678-K</p>;
     rutIngresado.focus();
   }
 });
