@@ -3,10 +3,10 @@ const moment = require("moment");
 // Configuración dependencia postgre_sql
 const { Pool } = require("pg");
 const pool = new Pool({
-  user: "postgres",
+  user: "almafinanciera",
   host: "localhost",
-  password: "postgres",
-  database: "alma",
+  password: "josealma24financiera24",
+  database: "almafina_taurus",
   port: 5432,
 });
 
