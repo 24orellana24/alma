@@ -1,7 +1,7 @@
 <div class="col-sm-6">
   <div class="card">
     <div class="card-body">
-      <h5 class="card-title my-2">Mis Datos Financieros <i class="bi bi-info-circle"></i></h5>
+      <h5 class="card-title my-2">Mis Datos Financieros <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop"><i class="bi bi-info-circle"></i></button></h5>
       <hr>
       <form method="post" action="/dashboard/calcular-semaforo" enctype="multipart/form-data">
         <div class="form-group row w-100 m-auto">
@@ -36,6 +36,28 @@
         </div>
         <button class="btn btn-success my-3 bi bi-calculator-fill">...calcular</button>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Información Datos Financieros</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quis repellat obcaecati atque impedit sapiente, voluptate in corporis id cum porro doloremque odio. Maiores vel, unde nisi perferendis voluptatibus dolorum exercitationem.
+        Lorem ipsum dolor, sit amet consectetur adipisicing elit. Praesentium, alias corrupti nobis accusantium dolore unde incidunt molestias consequatur delectus perferendis sequi similique dolor ab tempora, recusandae magni. Quia, sed pariatur!
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptates tempora, exercitationem, explicabo velit quasi quia ipsa id eveniet obcaecati quaerat rerum inventore dolores est aperiam illum dicta doloremque? Enim, quo?
+        Lorem ipsum dolor, sit amet consectetur adipisicing elit. Dolorem aperiam maiores aspernatur quia assumenda exercitationem ullam. Laboriosam, voluptate, dignissimos officiis velit sit dicta blanditiis totam tempore ullam doloremque molestiae tenetur.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Understood</button>
+      </div>
     </div>
   </div>
 </div>
