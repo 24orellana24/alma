@@ -7,8 +7,19 @@
   </head>
     
   <body class="bg-light text-center">
-    {{> menu }}
+    {{> menu }}    
     {{> bienvenida}}
+    <div class="card mx-3 mb-3" style="max-width: 100%">
+      <div class="row g-0">
+        <div class="col-md-12">
+          <div class="card-body">
+              <p><i class="bi bi-coin"></i> Ingresa tus datos financiero</p>
+              <p><i class="bi bi-calculator-fill"></i> Presiona el botón calcular para ver tus indicadores</p>
+              <p><i class="bi bi-headset"></i> Presiona el botón asesorías para agendar una cita y conversar con un asesor</p>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="row mx-1 mb-3">
       {{> datosFinancieros}}
       {{> datosSemaforo}}
