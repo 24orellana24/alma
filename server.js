@@ -77,6 +77,13 @@ app.get("/", async (req, res) => {
   });
 });
 
+app.get("/calculadora", async (req, res) => {
+  res.render("calculadora", {
+    layout: "calculadora",
+    indicadoresEconomicos: indicadoresEconomicos
+  });
+});
+
 app.get("/registro", async (req, res) => {
   res.render("registro", {
     layout: "registro",
@@ -131,13 +138,13 @@ app.get("/dashboard", validarToken, async (req, res) => {
     element.fechahora = moment(element.fechahora).format("DD-MM-YYYY HH:mm");
     if (element.semaforo == 1) {
       element["color"] = "success";
-      element["texto"] = "BUENO";
+      element["texto"] = " (Riesgo: BAJO)";
     } else if (element.semaforo == 0) {
       element["color"] = "warning";
-      element["texto"] = "REGULAR";
+      element["texto"] = " (Riesgo: MEDIO)";
     } else {
       element["color"] = "danger";
-      element["texto"] = "MALO";
+      element["texto"] = " (Riesgo: ALTO)";
     }
   });
 
@@ -249,7 +256,8 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.post("/dashboard/agendar-asesoria", validarToken, async (req, res) => {
+app.get("/dashboard/agendar-asesoria", validarToken, async (req, res) => {
+  console.log("leyendo post agendar")
   resultadoCitasRut = await consultaCitasRut(datosDecoded.rut);
   let citasPorFinalizar = 0;
   resultadoCitasRut.forEach(element => {
@@ -291,15 +299,15 @@ function calcularSemaforo(ingreso, cuota, deuda, activo) {
     if (carga <= (1/4)) {
       evaluacion = 1;
       color = "success"
-      texto = "BUENO"
+      texto = "(Riesgo: BAJO)"
     } else if (carga <= (2/4)) {
       evaluacion = 0;
       color = "warning"
-      texto = "REGULAR"
+      texto = "(Riesgo: MEDIO)"
     } else {
       evaluacion = -1;
       color = "danger"
-      texto = "MALO"
+      texto = "(Riesgo: ALTO)"
     };
   };
 
@@ -317,10 +325,10 @@ function calcularSemaforo(ingreso, cuota, deuda, activo) {
     texto: texto,
     rutCliente: datosDecoded.rut
   };
-  console.log(datosSemaforo.ingreso, ingreso);
   return datosSemaforo;
 }
 
+/*
 app.post("/dashboard/calcular-semaforo", validarToken, async (req, res) => {
   const { ingreso, cuota, deuda, activo } = req.body;
   const datosSemaforo = calcularSemaforo(ingreso, cuota, deuda, activo);
@@ -336,6 +344,7 @@ app.post("/dashboard/calcular-semaforo", validarToken, async (req, res) => {
     indicadoresEconomicos: indicadoresEconomicos
   });
 });
+*/
 
 app.post("/dashboard/datos-personales", validarToken, async (req, res) => {
   const { rut, email, apellido_paterno, apellido_materno, nombre, fecha_nacimiento, celular, comuna, password, rep_password, nombre_foto } = req.body;

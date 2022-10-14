@@ -1,15 +1,16 @@
-<div class="col-sm-6">
+<div class="col-lg-6 mb-3">
   <div class="card">
     <div class="card-body">
       <h5 class="card-title my-2">Mis Datos Financieros <a href="#" class="" data-bs-toggle="modal" data-bs-target="#staticBackdrop"><i class="bi bi-info-circle"></i></a></h5>
       <hr>
-      <form method="post" action="/dashboard/calcular-semaforo" enctype="multipart/form-data">
+      <!--<form id="formCalcular" method="post" enctype="multipart/form-data" action="/dashboard/calcular-semaforo">-->
+      <form id="formDatosFinancieros">
         <div class="form-group row w-100 m-auto">
           <div class="form-group col-12 col-sm-6 mb-3">
             <label>Ingresos</label>
             <div class="input-group">
               <span class="input-group-text" id="basic-addon1"><i class="bi bi-currency-dollar"></i></span>
-              <input id="ingreso" name="ingreso" type="number" min="0" class="form-control m-auto text-center" value="{{semaforo.ingreso}}" required/>
+              <input id="ingreso" name="ingreso" type="number" min="0" class="form-control m-auto text-center" value="{{semaforo.ingreso}}"/>
             </div>
           </div>
           <div class="form-group col-12 col-sm-6 mb-3">
@@ -34,13 +35,14 @@
             </div>
           </div>
         </div>
-        <button class="btn btn-success my-3 bi bi-calculator-fill">...calcular</button>
+        <!--<button class="btn btn-success my-3 bi bi-calculator-fill">...calcular</button>-->
+        <button class="btn btn-success my-3 bi bi-calculator-fill" type="button" onclick="calcularRatios()">...calcular</button>
       </form>
     </div>
   </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal Datos Financieros-->
 <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">

@@ -7,18 +7,17 @@
   </head>
     
   <body class="bg-light text-center">
-
-    {{> menuDashboard}}    
-    {{> bienvenida}}
+    {{> menu}}
+    <h3 class="my-3">Calculadora de Indicadores</h3>
     {{> indicaciones}}
-    <div class="row mx-1">
+    <div class="row mx-1 mb-3">
       {{> datosFinancieros}}
       {{> datosSemaforo}}
     </div>
-    <div class="listass">
-      {{> listaIndicadores}}
-    </div>
-    {{> pie }}
+    <div>
+      <a href="/" class="btn btn-primary mb-3 bi bi-skip-backward-fill">...volver</a>
+    </div>  
+    {{> pie}}
 
     <!-- Modal Indicadores e informe de riesgo-->
     <div class="modal fade" id="modalInformeRiesgo" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -36,10 +35,9 @@
             <p id="infoLeverage" class="mb-4"></p>
             <h5 class="bg-light">Patrimonio ($)</h5>
             <p id="infoPatrimonio" class="mb-4"></p>
+            <p>Si necesitas una aseoría más detallada puedes <b><a href="/registro">registrarte</a></b> en nuestro portal de manera <b>GRATUITA</b>.</p>
           </div>
           <div class="modal-footer">
-            <a href="/dashboard/agendar-asesoria" class="btn btn-primary bi bi-telephone-outbound"> Asesoría</a>
-            <!--<button type="button" class="btn btn-secondary bg-primary" action="/dashboard/agendar-asesoria"><i class="bi bi-telephone-outbound"></i> Asesoria</button>-->
             <button type="button" class="btn btn-secondary bg-danger" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Cerrar</button>
           </div>
         </div>
