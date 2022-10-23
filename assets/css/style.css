@@ -17,6 +17,16 @@ footer {
   margin-top: auto;
 }
 
+.alerta-registro-rut {
+  color: red;
+  font-size: small;
+}
+
+.alerta-agenda-hora {
+  color: red;
+  font-size: small;
+}
+
 @media (max-width: 1024px) {
 
   .listass {

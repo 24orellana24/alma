@@ -12,8 +12,12 @@
     {{> bienvenida}}
     {{> indicaciones}}
     <div class="row mx-1">
-      {{> datosFinancieros}}
-      {{> datosSemaforo}}
+      <form id="datosFinancieros">
+        {{> datosFinancieros}}
+        {{> datosSemaforo}}
+      </form>
+      <div>
+      </div>
     </div>
     <div class="listass">
       {{> listaIndicadores}}
@@ -38,8 +42,7 @@
             <p id="infoPatrimonio" class="mb-4"></p>
           </div>
           <div class="modal-footer">
-            <a href="/dashboard/agendar-asesoria" class="btn btn-primary bi bi-telephone-outbound"> Asesoría</a>
-            <!--<button type="button" class="btn btn-secondary bg-primary" action="/dashboard/agendar-asesoria"><i class="bi bi-telephone-outbound"></i> Asesoria</button>-->
+            <button type="submit" class="btn btn-secondary bg-primary" form="datosFinancieros" formaction="/dashboard/agendar-asesoria" formmethod="post"><i class="bi bi-telephone-outbound"></i> Asesoria</button>
             <button type="button" class="btn btn-secondary bg-danger" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Cerrar</button>
           </div>
         </div>

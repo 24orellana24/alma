@@ -17,39 +17,40 @@
 
     <form method="post" action="/registro" enctype="multipart/form-data">
       <div class="form-group row w-80 m-auto">
-        <div id="alertas-registro" class="form-group mb-3 border border-danger" style="display: none">
-          <!--<p id="mensajes">Prueba de mensajes</p>-->
-        </div>
-        <div class="form-group col-12 col-sm-6">
+
+        <div class="form-group col-12 col-sm-6 mb-3">
           <label>Rut</label>
           <input id="rut" name="rut" class="form-control m-auto text-center" title="Ingresar rut sin puntos, con guión y con dígito verificador. Si el dígito verificador es K, debe ser ingresado con mayúscula. Ej. 12345678-K" placeholder="12345678-K" required/>
+          <div id="alerta-registro-rut" style="display: none">
+            <p class="alerta-registro-rut"><i class="bi bi-exclamation-circle-fill"></i> Rut debe ser sin puntos, con guión y dígito verificador. Si termina en "K", debe ser con mayúscula</p>
+          </div>
         </div>
-        <div class="form-group col-12 col-sm-6">
+        <div class="form-group col-12 col-sm-6 mb-3">
           <label>Nombre</label>
           <input id="nombre" name="nombre" class="form-control m-auto text-center" required/>
         </div>
-        <div class="form-group col-12 col-sm-6">
+        <div class="form-group col-12 col-sm-6 mb-3">
           <label>Email</label>
           <input id="email" name="email" type="email" class="form-control m-auto text-center" required/>
         </div>
-        <div class="form-group col-12 col-sm-6">
+        <div class="form-group col-12 col-sm-6 mb-3">
           <label>N° Celular</label>
           <div class="input-group">
             <span class="input-group-text" id="basic-addon1"> +56 </span>
             <input id="celular" name="celular" type="text" class="form-control m-auto text-center" pattern="\d{9}" placeholder="9 1234 5678" title="EL número de celular debe ser de 9 dígitos (ej: 9 1234 5678)" required/>
           </div>
         </div>
-        <div class="form-group col-12 col-sm-6">
+        <div class="form-group col-12 col-sm-6 mb-3">
           <label>Password</label>
           <input id="password" name="password" type="password" class="form-control m-auto text-center" pattern="^(?=\w*\d)(?=\w*[A-Z])(?=\w*[a-z])\S{8,16}$" title="Debe ser alfanumérica, al menos una letra debe ser mayúscula y el largo debe ser entre 8 y 16 caracteres" required/>
         </div>
-        <div class="form-group col-12 col-sm-6">
+        <div class="form-group col-12 col-sm-6 mb-3">
           <label>Repetir Password</label>
           <input id="rep_password" name="rep_password" type="password" class="form-control m-auto text-center" required/>
         </div>
       </div>
-      <button class="btn btn-success my-3 bi bi-server">...registrarme</button>
-      <a href="/" class="btn btn-danger my-3 bi bi-skip-backward-fill"> ...volver</a>
+      <button class="btn btn-success my-3 bi bi-server"> registrarme</button>
+      <a href="/" class="btn btn-danger my-3 bi bi-skip-backward-fill"> volver</a>
     </form>
 
   </div>

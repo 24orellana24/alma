@@ -1,6 +1,6 @@
 // Script para validar rut
 const rutIngresado = document.getElementById("rut");
-const alertasRegistro = document.getElementById("alertas-registro");
+const alertasRegistro = document.getElementById("alerta-registro-rut");
 rutIngresado.addEventListener("blur", () => {
   let rutValor = rutIngresado.value;
   if ( (/^[0-9]{7,8}[-|‐]{1}[0-9kK]{1}$/.test(rutValor)) || (/^\d{1,2}\.\d{3}\.\d{3}[-|‐][0-9kK]{1}$/.test(rutValor)) || (/^[0-9]{7,8}[0-9kK]{1}$/.test(rutValor)) ) {
@@ -22,21 +22,17 @@ rutIngresado.addEventListener("blur", () => {
 
     if (digitoCalculado === 11) digitoCalculado = 0; 
     if (digitoCalculado === 10) digitoCalculado = "K";
-    
-    console.log(`Ingresado: ${digitoVerificador}, ${isNaN(digitoVerificador)} | Calculado: ${digitoCalculado}, ${isNaN(digitoCalculado)}`);
 
     if (digitoVerificador == digitoCalculado) {      
       rutIngresado.value = `${rutValor.slice(0, -1)}-${digitoCalculado}`;
       alertasRegistro.style.display = "none";
     } else {
       alertasRegistro.style.display = "";
-      alertasRegistro.innerHTML = '<h3"><i class="bi bi-exclamation-circle"></i></h3><p>Formato rut erroneo: el rut debe ser sin puntos, con guión y dígito verificador. Si el dígito verificador es K, debe ser ingresado con mayúscula. Ej: 12345678-K</p>';
       rutIngresado.focus();
     }
 
   } else {
     alertasRegistro.style.display = "";
-    alertasRegistro.innerHTML = '<h3><i class="bi bi-exclamation-circle"></i></h3><p>Formato rut erroneo: el rut debe ser sin puntos, con guión y dígito verificador. Si el dígito verificador es K, debe ser ingresado con mayúscula. Ej: 12345678-K</p>';
     rutIngresado.focus();
   }
 });

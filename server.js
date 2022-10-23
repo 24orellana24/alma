@@ -116,11 +116,9 @@ app.get("/dashboard", validarToken, async (req, res) => {
 
   resultadoCitasRut.forEach(element => element.fecha = moment(element.fecha).format("DD-MM-YYYY"));
 
-  if (resultadoSemaforo.length > 0) {
-    console.log(resultadoSemaforo);
-    resultadoSemaforo = [calcularSemaforo(resultadoSemaforo[0].ingreso, resultadoSemaforo[0].cuota, resultadoSemaforo[0].deuda, resultadoSemaforo[0].activo)];
-    console.log(resultadoSemaforo);
-  } else {
+  if (resultadoSemaforo.length <= 0) {
+    //resultadoSemaforo = [calcularSemaforo(resultadoSemaforo[0].ingreso, resultadoSemaforo[0].cuota, resultadoSemaforo[0].deuda, resultadoSemaforo[0].activo)];
+  //} else {
     resultadoSemaforo = [{
       ingreso: 0,
       cuota: 0,
@@ -134,17 +132,44 @@ app.get("/dashboard", validarToken, async (req, res) => {
     }];
   }
 
+  /*if (resultadoSemaforo.semaforo == 1) {
+    resultadoSemaforo.push({color: "success", texto: "Riesgo: BAJO"});
+    //element["texto"] = "(Riesgo: BAJO)";
+  } else if (resultadoSemaforo.semaforo == 0) {
+    resultadoSemaforo.push({color: "warning", texto: "Riesgo: MEDIO"});
+    //element["color"] = "warning";
+    //element["texto"] = "(Riesgo: MEDIO)";
+  } else {
+    resultadoSemaforo["texto"] = "Riesgo: ALTO";
+    //element["color"] = "danger";
+    //element["texto"] = "(Riesgo: ALTO)";
+  }*/
+
+  resultadoSemaforo.forEach(element => {
+    element.fechahora = moment(element.fechahora).format("DD-MM-YYYY HH:mm");
+    if (element.semaforo == 1) {
+      element["color"] = "success";
+      element["texto"] = "(Riesgo: BAJO)";
+    } else if (element.semaforo == 0) {
+      element["color"] = "warning";
+      element["texto"] = "(Riesgo: MEDIO)";
+    } else {
+      element["color"] = "danger";
+      element["texto"] = "(Riesgo: ALTO)";
+    }
+  });
+
   resultadoSemaforos.forEach(element => {
     element.fechahora = moment(element.fechahora).format("DD-MM-YYYY HH:mm");
     if (element.semaforo == 1) {
       element["color"] = "success";
-      element["texto"] = " (Riesgo: BAJO)";
+      element["texto"] = "(Riesgo: BAJO)";
     } else if (element.semaforo == 0) {
       element["color"] = "warning";
-      element["texto"] = " (Riesgo: MEDIO)";
+      element["texto"] = "(Riesgo: MEDIO)";
     } else {
       element["color"] = "danger";
-      element["texto"] = " (Riesgo: ALTO)";
+      element["texto"] = "(Riesgo: ALTO)";
     }
   });
 
@@ -156,7 +181,6 @@ app.get("/dashboard", validarToken, async (req, res) => {
     indicadores: resultadoSemaforos,
     totales: {"totalCitas": totalCitas = resultadoCitasRut.length, "totalSemaforos": totalSemaforos = resultadoSemaforos.length},
     indicadoresEconomicos: indicadoresEconomicos,
-    prueba: "none"
   });
 });
 
@@ -256,8 +280,36 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/dashboard/agendar-asesoria", validarToken, async (req, res) => {
-  console.log("leyendo post agendar")
+let datosSemaforo;
+
+app.post("/dashboard/agendar-asesoria", validarToken, async (req, res) => {
+  const {ingreso, cuota, deuda, activo, carga, leverage, patrimonio, fecha_hora} = req.body;
+  
+  let evaluacionCarga
+  
+  if (carga <= (25)) {
+    evaluacionCarga = 1
+  } else if (carga <= (50)) {
+    evaluacionCarga = 0
+  } else {
+    evaluacionCarga = -1
+  };
+
+  datosSemaforo = {
+    ingreso: Number(ingreso),
+    cuota: Number(cuota),
+    deuda: Number(deuda),
+    activo: Number(activo),
+    carga: Number(carga),
+    leverage: Number(leverage),
+    patrimonio: Number(patrimonio),
+    fechahora: moment(Date.now()).format("DD/MM/YYYY HH:mm:ss"),
+    semaforo: evaluacionCarga,
+    rutCliente: datosDecoded.rut
+  };
+
+  console.log(datosSemaforo)
+  
   resultadoCitasRut = await consultaCitasRut(datosDecoded.rut);
   let citasPorFinalizar = 0;
   resultadoCitasRut.forEach(element => {
@@ -269,82 +321,22 @@ app.get("/dashboard/agendar-asesoria", validarToken, async (req, res) => {
     res.send(`<script>alert("Ya tiene una asesoría en proceso, no puede generar una nueva asesoría"); window.location.href = "/dashboard"; </script>`);
   } else {
     const resultadoCliente = await consultaCliente(datosDecoded.rut);
-    if (datosSemaforo) {    
-      if (datosSemaforo.ingreso > 0) {
-        await nuevoSemaforo(datosSemaforo);
-      }
-    }
-    datosSemaforo = {}
+    let fechasDisponibles = [];
+    let numeroDias = 6;
+    do {
+      numeroDias = numeroDias + 1;
+      let fechaAgregar = new Date(moment().add(numeroDias, "days").calendar());
+      fechasDisponibles.push(moment(fechaAgregar).format("DD-MM-YYYY"));
+    } while (numeroDias < 13);
+    //datosSemaforo = {}
     res.render("agenda", {
       layout: "agenda",
       cliente: resultadoCliente[0],
-      indicadoresEconomicos: indicadoresEconomicos
+      indicadoresEconomicos: indicadoresEconomicos,
+      fechasDisponibles: fechasDisponibles,
     });
   };
 });
-
-let datosSemaforo;
-function calcularSemaforo(ingreso, cuota, deuda, activo) {
-  let carga = 0;
-  let leverage = 0;
-  let patrimonio = 0;
-  let evaluacion = 0;
-  let color = ""
-  let texto = ""
-
-  if (ingreso > 0) {
-    carga = (cuota / ingreso).toFixed(4);
-    leverage = (deuda / ingreso).toFixed(2);
-    patrimonio = activo - deuda;
-    if (carga <= (1/4)) {
-      evaluacion = 1;
-      color = "success"
-      texto = "(Riesgo: BAJO)"
-    } else if (carga <= (2/4)) {
-      evaluacion = 0;
-      color = "warning"
-      texto = "(Riesgo: MEDIO)"
-    } else {
-      evaluacion = -1;
-      color = "danger"
-      texto = "(Riesgo: ALTO)"
-    };
-  };
-
-  datosSemaforo = {
-    ingreso: Number(ingreso),
-    cuota: Number(cuota),
-    deuda: Number(deuda),
-    activo: Number(activo),
-    carga: Number(carga * 100),
-    leverage: Number(leverage),
-    patrimonio: Number(patrimonio),
-    fechahora: moment(Date.now()).format("DD/MM/YYYY HH:mm:ss"),
-    semaforo: evaluacion,
-    color: color,
-    texto: texto,
-    rutCliente: datosDecoded.rut
-  };
-  return datosSemaforo;
-}
-
-/*
-app.post("/dashboard/calcular-semaforo", validarToken, async (req, res) => {
-  const { ingreso, cuota, deuda, activo } = req.body;
-  const datosSemaforo = calcularSemaforo(ingreso, cuota, deuda, activo);
-  const resultadoCliente = await consultaCliente(datosDecoded.rut);
-
-  res.render("dashboard", {
-    layout: "dashboard",
-    cliente: resultadoCliente[0],
-    semaforo: datosSemaforo,
-    citas: resultadoCitasRut,
-    indicadores: resultadoSemaforos,
-    totales: {"totalCitas": totalCitas = resultadoCitasRut.length, "totalSemaforos": totalSemaforos = resultadoSemaforos.length},
-    indicadoresEconomicos: indicadoresEconomicos
-  });
-});
-*/
 
 app.post("/dashboard/datos-personales", validarToken, async (req, res) => {
   const { rut, email, apellido_paterno, apellido_materno, nombre, fecha_nacimiento, celular, comuna, password, rep_password, nombre_foto } = req.body;
@@ -390,20 +382,23 @@ app.post("/dashboard/datos-personales", validarToken, async (req, res) => {
 });
 
 app.post("/dashboard/agendar-asesoria/cita", validarToken, async (req, res) => {
-  const { fecha, hora, comentario } = req.body;
+  let { fecha, hora, comentario } = req.body;
+  fecha = fecha.split("-");
   const datosCita = {
-    fecha: fecha,
+    fecha: new Date(fecha[2], fecha[1], fecha[0]),
     hora: hora,
     comentario: comentario,
     estado: false,
     rut: datosDecoded.rut
-
   }
 
-  const resultadoCita = await nuevaCita(datosCita);
+  console.log(datosSemaforo);
 
-  if (resultadoCita) {
-    res.send(`<script>alert("Cita agendada para el ${moment(resultadoCita[0].fecha).format("DD-MM-YYYY")} a las ${resultadoCita[0].hora} "); window.location.href = "/dashboard"; </script>`);
+  const resultadoNuevaCita = await nuevaCita(datosCita);
+  const resultadoNuevoSemaforo = await nuevoSemaforo(datosSemaforo);
+
+  if (resultadoNuevaCita && resultadoNuevoSemaforo) {
+    res.send(`<script>alert("Cita agendada para el ${moment(resultadoNuevaCita[0].fecha).format("DD-MM-YYYY")} a las ${resultadoNuevaCita[0].hora} "); window.location.href = "/dashboard"; </script>`);
   } else {
     res.send(`<script>alert("Error al generar cita: ${error.code}"); window.location.href = "/dashboard/agendar-asesoria"; </script>`);
   };
