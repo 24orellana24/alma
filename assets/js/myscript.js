@@ -51,29 +51,32 @@ function calcularRatios() {
   let texto = ""
 
   if (ingreso > 0) {
+    document.getElementById("alerta-datosFinancieros-ingreso").style.display = "none";
     carga = ((cuota / ingreso) * 100).toFixed(2);
     leverage = (deuda / ingreso).toFixed(2);
     patrimonio = activo - deuda;
     if (carga <= (25)) {
       evaluacion = 1;
       color = "success"
-      texto = " (Riesgo: BAJO)"
+      texto = "(Riesgo: BAJO)"
     } else if (carga <= (50)) {
       evaluacion = 0;
       color = "warning"
-      texto = " (Riesgo: MEDIO)"
+      texto = "(Riesgo: MEDIO)"
     } else {
       evaluacion = -1;
       color = "danger"
-      texto = " (Riesgo: ALTO)"
+      texto = "(Riesgo: ALTO)"
     };
     document.getElementById("carga").value = carga;
     document.getElementById("leverage").value = leverage;
     document.getElementById("patrimonio").value = patrimonio;
     document.getElementById("fecha_hora").value = moment(Date.now()).format("DD/MM/YYYY HH:mm:ss");
-    document.getElementById("tituloSemaforo").innerHTML = `<h5 id="tituloSemaforo" class="card-title my-2 bg-${color}">Mis Indicadores <b id="notaRiesgo" class="fs-6">${texto}</b></h5>`;
+    document.getElementById("tituloSemaforo").className = `card-title my-2 bg-${color} bg-opacity-50`;
+    document.getElementById("notaRiesgo").innerText = `${texto}`;
   } else {
-    alert("Ingreso debe ser mayor a cero")
+    document.getElementById("alerta-datosFinancieros-ingreso").style.display = "";
+    document.getElementById("ingreso").focus();
   };
 };
 
@@ -87,7 +90,8 @@ function limpiarRatios() {
   document.getElementById("leverage").value = "";
   document.getElementById("patrimonio").value = "";
   document.getElementById("fecha_hora").value = "";
-  document.getElementById("tituloSemaforo").innerHTML = `<h5 id="tituloSemaforo" class="card-title my-2 bg-white">Mis Indicadores </h5>`;
+  document.getElementById("tituloSemaforo").className = `card-title my-2`;
+  document.getElementById("notaRiesgo").innerText = "";
 };
 
 // Script para generar informe de riesgo
