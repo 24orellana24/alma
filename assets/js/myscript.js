@@ -92,13 +92,11 @@ function limpiarRatios() {
   document.getElementById("fecha_hora").value = "";
   document.getElementById("tituloSemaforo").className = `card-title my-2`;
   document.getElementById("notaRiesgo").innerText = "";
+  document.getElementById("alerta-datosFinancieros-ingreso").style.display = "none";
 };
 
 // Script para generar informe de riesgo
 function informeRiesgo() {
-
-  //calcularRatios();
-
   let ingreso = document.getElementById("ingreso").value;
   let deuda = document.getElementById("deuda").value;
   let activo = document.getElementById("activo").value;
