@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+  <head>
+  {{> cabecera}}
+  </head>
+    
+  <body class="bg-light text-center">
+    {{> menu}}
+    <h3 class="mt-3">Tu Presupuesto</h3>
+    <div class="mb-3">
+      <a href="/" class="mb-3">volver</a>
+    </div>
+    <div class="row mx-1 mb-3">
+      {{> datosPresupuesto}}
+    </div>
+    {{> pie}}
+
+    <!-- Modal Indicadores e informe de riesgo-->
+    <div class="modal fade" id="modalInformeRiesgo" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="staticBackdropLabel">Informe <i class="bi bi-graph-up-arrow fs-4"></i></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p id="sinIndicadores" class="text-danger" style="display: none;"></p>
+            <h5 class="bg-light">Carga Financiera (%)</h5>
+            <p id="infoCarga" class="mb-4"></p>
+            <h5 class="bg-light">Nivel de Endeudamiento (vr)</h5>
+            <p id="infoLeverage" class="mb-4"></p>
+            <h5 class="bg-light">Patrimonio ($)</h5>
+            <p id="infoPatrimonio" class="mb-4"></p>
+            <p>Si necesitas una aseoría más detallada puedes <b><a href="/registro">registrarte</a></b> en nuestro portal de manera <b>GRATUITA</b>.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary bg-danger" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </body>
+
+</html>

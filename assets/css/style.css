@@ -32,6 +32,11 @@ footer {
   font-size: small;
 }
 
+.alerta-presupuesto-ingresos {
+  color: red;
+  font-size: small;
+}
+
 @media (max-width: 1024px) {
 
   .listass {

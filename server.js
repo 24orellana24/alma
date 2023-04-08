@@ -84,6 +84,13 @@ app.get("/calculadora", async (req, res) => {
   });
 });
 
+app.get("/presupuesto", async (req, res) => {
+  res.render("presupuesto", {
+    layout: "presupuesto",
+    indicadoresEconomicos: indicadoresEconomicos
+  });
+});
+
 app.get("/registro", async (req, res) => {
   res.render("registro", {
     layout: "registro",
@@ -91,9 +98,9 @@ app.get("/registro", async (req, res) => {
   });
 });
 
-app.get("/login", async (req, res) => {
-  res.render("login", {
-    layout: "login",
+app.get("/login-cliente", async (req, res) => {
+  res.render("loginCliente", {
+    layout: "loginCliente",
     indicadoresEconomicos: indicadoresEconomicos
   });
 });
@@ -265,7 +272,7 @@ app.post("/registro", async (req, res) => {
 
 });
 
-app.post("/login", async (req, res) => {
+app.post("/login-cliente", async (req, res) => {
   const { rut, password } = req.body;
   const resultadoCliente = await consultaCliente(rut);
   if (resultadoCliente.length > 0 && resultadoCliente !== undefined) {
@@ -273,10 +280,16 @@ app.post("/login", async (req, res) => {
       token = generadorAccesoToken(resultadoCliente[0]);
       res.redirect("/dashboard")
     } else {
-      res.send(`<script>alert("Rut o Password incorrectos"); window.location.href = "/login"; </script>`);
+      res.render("loginError", {
+        layout: "loginError",
+        indicadoresEconomicos: indicadoresEconomicos,
+      });
     }
   } else {
-    res.send(`<script>alert("Rut o Password incorrectos"); window.location.href = "/login"; </script>`);
+    res.render("loginError", {
+      layout: "loginError",
+      indicadoresEconomicos: indicadoresEconomicos,
+    });
   }
 });
 
@@ -412,10 +425,16 @@ app.post("/login-asesor", async (req, res) => {
       token = generadorAccesoToken(resultadoAsesor[0]);
       res.redirect("/dashboard-asesor");
     } else {
-      res.send(`<script>alert("Rut o Password incorrectos"); window.location.href = "/login-asesor"; </script>`);
+      res.render("loginError", {
+        layout: "loginError",
+        indicadoresEconomicos: indicadoresEconomicos,
+      });
     }
   } else {
-    res.send(`<script>alert("Rut o Password incorrectos"); window.location.href = "/login-asesor"; </script>`);
+    res.render("loginError", {
+      layout: "loginError",
+      indicadoresEconomicos: indicadoresEconomicos,
+    });
   }
 });
 

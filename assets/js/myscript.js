@@ -1,3 +1,5 @@
+let tablaIngresos = [];
+
 // Script para validar rut
 const rutIngresado = document.getElementById("rut");
 const alertasRegistro = document.getElementById("alerta-registro-rut");
@@ -158,3 +160,74 @@ function informeRiesgo() {
   };
 
 }
+
+// Sumar ingresos
+function sumarIngreso() {
+  let tipoIngreso = document.getElementById("tipoIngreso");
+  let montoIngreso = document.getElementById("montoIngreso");
+  let comentarioIngreso = document.getElementById("comentarioIngreso");
+  let alertaPresupuestoIngreso = document.getElementById("alerta-presupuesto-ingresos");
+  let btnAlertaPresupuestoIngreso = document.getElementById("btn-alerta-presupuesto-ingresos");
+  if (tipoIngreso.value != "" && montoIngreso.value > 0) {
+    document.getElementById("tablaIngresos").style.display = "";
+    tablaIngresos.push({
+      tipoIngreso: tipoIngreso.value,
+      montoIngreso: Number(montoIngreso.value),
+      comentarioIngreso: comentarioIngreso.value,
+    });
+    tipoIngreso.value = "";
+    montoIngreso.value = "";
+    comentarioIngreso.value = "";
+
+    constructorTablaIngresos(tablaIngresos);
+
+    escuchandoBotonesEliminarIngreso();
+    
+    ocultarAlertaPresupuestoIngreso(alertaPresupuestoIngreso);
+  
+  } else {
+    alertaPresupuestoIngreso.style.display = "";
+    btnAlertaPresupuestoIngreso.focus();
+  };
+};
+
+function constructorTablaIngresos(tablaIngresos) {
+  document.getElementById("filasIngresos").innerHTML = ""
+  let indice = 0;
+  let sumaIngresos = 0;
+  let totalIngresos = document.getElementById("totalIngresos");
+  tablaIngresos.forEach(element => {
+    indice = indice + 1;
+    sumaIngresos = sumaIngresos + element.montoIngreso;      
+    document.getElementById("filasIngresos").innerHTML += `
+    <tr>
+      <th scope="row">${indice}</th>
+      <td>${element.tipoIngreso}</td>
+      <td>${element.montoIngreso}</td>
+      <td>${element.comentarioIngreso}</td>
+      <td><button id="btn-ing-${indice}" type="button" class="btn-Restar-Ingreso text-danger bg-transparent border-0 rounded-circle" title="eliminar"><i class="bi bi-dash-circle-fill"></i></button></td>
+    </tr>
+    `
+  });
+  totalIngresos.value = sumaIngresos;
+  if (tablaIngresos.length <= 0) document.getElementById("tablaIngresos").style.display = "none";
+};
+
+function escuchandoBotonesEliminarIngreso() {
+  let botonesRestarIngreso = document.querySelectorAll(".btn-Restar-Ingreso");
+
+  const clickRestarIngreso = function () {
+    const indiceEliminar = this.id.split("-");
+    tablaIngresos.splice(indiceEliminar[2] - 1, 1);
+    constructorTablaIngresos(tablaIngresos);
+    escuchandoBotonesEliminarIngreso();
+  };
+
+  botonesRestarIngreso.forEach(boton => {
+    boton.addEventListener("click", clickRestarIngreso);
+  });
+};
+
+function ocultarAlertaPresupuestoIngreso() {
+  document.getElementById("alerta-presupuesto-ingresos").style.display = "none";
+};
