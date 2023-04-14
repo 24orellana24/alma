@@ -10,14 +10,20 @@
 
   {{> menuDashboard }}
 
+  <div class="alert alert-danger alert-dismissible fade show align-self-center" role="alert" style="width: 20rem; display: {{activarMensaje}}">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <p>Revisar rut y/o contraseña</p>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
   <div class="card mx-3 align-self-center" style="width: 20rem">
-    <H5 class="my-4 text-center">Credenciales de Asesor</H5>
-    <form method="post" action="/login-asesor" enctype="multipart/form-data" class="">
+    <h5 class="my-4 text-center">{{tituloLogin}}</h5>
+    <form method="post" action="{{ruta}}" enctype="multipart/form-data" class="">
       <div class="form-group row w-80 m-auto mb-5">
         <div class="form-group col-12 mb-3">
-           <div class="input-group">
+          <div class="input-group">
             <span class="input-group-text" id="basic-addon1"><i class="bi bi-person-fill"></i></span>
-            <input id="rut" name="rut" type="text" class="form-control m-auto" placeholder="Rut" aria-label="Username" aria-describedby="basic-addon1" title="Ingresar rut sin puntos, con guión y con dígito verificador, si el dígito verificador es K, debe ser ingresado con MAYÚSCULA" required>
+            <input id="rut" name="rut" type="text" class="form-control m-auto" placeholder="Rut" aria-label="Username" aria-describedby="basic-addon1" title="Ejemplo: 12345678-K" required>
           </div>
         </div>
         <div class="form-group col-12">

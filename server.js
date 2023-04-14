@@ -99,15 +99,21 @@ app.get("/registro", async (req, res) => {
 });
 
 app.get("/login-cliente", async (req, res) => {
-  res.render("loginCliente", {
-    layout: "loginCliente",
+  res.render("login", {
+    layout: "login",
+    activarMensaje: "none",
+    ruta: req.route.path,
+    tituloLogin: "Credenciales de Cliente",
     indicadoresEconomicos: indicadoresEconomicos
   });
 });
 
 app.get("/login-asesor", async (req, res) => {
-  res.render("loginAsesor", {
-    layout: "loginAsesor",
+  res.render("login", {
+    layout: "login",
+    activarMensaje: "none",
+    ruta: req.route.path,
+    tituloLogin: "Credenciales de Asesor",
     indicadoresEconomicos: indicadoresEconomicos
   });
 });
@@ -138,19 +144,6 @@ app.get("/dashboard", validarToken, async (req, res) => {
       semaforo: 0
     }];
   }
-
-  /*if (resultadoSemaforo.semaforo == 1) {
-    resultadoSemaforo.push({color: "success", texto: "Riesgo: BAJO"});
-    //element["texto"] = "(Riesgo: BAJO)";
-  } else if (resultadoSemaforo.semaforo == 0) {
-    resultadoSemaforo.push({color: "warning", texto: "Riesgo: MEDIO"});
-    //element["color"] = "warning";
-    //element["texto"] = "(Riesgo: MEDIO)";
-  } else {
-    resultadoSemaforo["texto"] = "Riesgo: ALTO";
-    //element["color"] = "danger";
-    //element["texto"] = "(Riesgo: ALTO)";
-  }*/
 
   resultadoSemaforo.forEach(element => {
     element.fechahora = moment(element.fechahora).format("DD-MM-YYYY HH:mm");
@@ -280,15 +273,21 @@ app.post("/login-cliente", async (req, res) => {
       token = generadorAccesoToken(resultadoCliente[0]);
       res.redirect("/dashboard")
     } else {
-      res.render("loginError", {
-        layout: "loginError",
-        indicadoresEconomicos: indicadoresEconomicos,
+      res.render("login", {
+        layout: "login",
+        activarMensaje: "",
+        ruta: req.route.path,
+        tituloLogin: "Credenciales de Cliente",
+        indicadoresEconomicos: indicadoresEconomicos
       });
     }
   } else {
-    res.render("loginError", {
-      layout: "loginError",
-      indicadoresEconomicos: indicadoresEconomicos,
+    res.render("login", {
+      layout: "login",
+      activarMensaje: "",
+      ruta: req.route.path,
+      tituloLogin: "Credenciales de Cliente",
+      indicadoresEconomicos: indicadoresEconomicos
     });
   }
 });
@@ -425,15 +424,21 @@ app.post("/login-asesor", async (req, res) => {
       token = generadorAccesoToken(resultadoAsesor[0]);
       res.redirect("/dashboard-asesor");
     } else {
-      res.render("loginError", {
-        layout: "loginError",
-        indicadoresEconomicos: indicadoresEconomicos,
+      res.render("login", {
+        layout: "login",
+        activarMensaje: "",
+        ruta: req.route.path,
+        tituloLogin: "Credenciales de Asesor",
+        indicadoresEconomicos: indicadoresEconomicos
       });
     }
   } else {
-    res.render("loginError", {
-      layout: "loginError",
-      indicadoresEconomicos: indicadoresEconomicos,
+    res.render("login", {
+      layout: "login",
+      activarMensaje: "",
+      ruta: req.route.path,
+      tituloLogin: "Credenciales de Asesor",
+      indicadoresEconomicos: indicadoresEconomicos
     });
   }
 });
