@@ -1,0 +1,125 @@
+<!-- Tabla Gastos Financieros -->
+<div class="container rounded-top bg-white mb-3">
+  <div class="row border-bottom border-primary mb-2">
+    <div class="col-8 text-start">
+      <b><u>Gastos Financieros</u></b>
+        <a class="btn btn-sm" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Ingresos:" data-bs-content="Entendemos por ingresos personales todo el dinero que recibimos por cualquier concepto, como un salario, el cobro de una factura propia, los intereses de cuentas o de inversiones, la devolución de hacienda, un premio de lotería, etc. Para ordenar los ingresos personales, diferenciamos entre fijos y variables."><i class="text-primary bi bi-info-circle" data-bs-toggle="tooltip" data-bs-title="más información"></i></a>
+      <div>
+        <i class="bi bi-coin"> {{totalGastosFinancierosMensuales}} mes</i> 
+        <i class="listass bi bi-three-dots-vertical"></i>
+        <i class="listass bi bi-coin"> {{totalGastosFinancierosAnuales}} año</i>
+      </div>
+    </div>
+    <div class="col text-end">
+      <div class="btn-group my-3" role="group" aria-label="Basic outlined example">
+        <button type="button" class="text-success border border-secundary bg-transparent" onclick="sumarGastoFinanciero()"><i class="bi bi-plus-circle" data-bs-toggle="tooltip" data-bs-title="agregar ingreso"></i></button>
+        <!--<i class="listass bi bi-three-dots-vertical"></i>-->
+        <button type="button" class="text-danger border border-secundary bg-transparent mx-1" onclick="limpiarTabla('{{tablaGastosFinancieros.[0].indiceGastoFinanciero}}', '/presupuesto-borrarGastosFinancieros', 'gastos financieros')"><i class="bi bi-trash3" data-bs-toggle="tooltip" data-bs-title="eliminar todos los ingresos"></i></button>
+        <!--<i class="listass bi bi-three-dots-vertical"></i>-->
+        <button type="button" class="text-secondary border border-secundary bg-transparent"><i class="bi bi-toggles" data-bs-toggle="tooltip" data-bs-title="ocultar / mostrar ingresos" onclick="ocultarMostrarGastosFinancieros({{tablaGastosFinancieros.[0].indiceGastoFinanciero}})"></i></button>
+      </div>
+    </div>
+  </div>
+  <div id="tablaGastosFinancieros" class="text-start" style="display: {{verTablaGastosFinancieros}}">
+    <div class="row border-bottom my-1">
+      <div class="col-1 listass">
+        <b>N°</b>
+      </div>
+      <div class="col">
+        <b>Tipo</b>
+      </div>
+      <div class="col">
+        <b>Mensual <i class="bi bi-coin"></i></b>
+      </div>
+      <div class="col listass">
+        <b>Anual <i class="bi bi-coin"></i></b>
+      </div>
+      <div class="col listass">
+        <b>Saldo <i class="bi bi-coin"></i></b>
+      </div>
+      <div class="col listass">
+        <b>Observaciones</b>
+      </div>
+      <div class="col text-end">
+        <!--<b class="listass">Acción</b>-->
+      </div>
+    </div>
+    {{#each tablaGastosFinancieros}}
+      <div class="row border-bottom my-1">
+        <div class="col-1 listass">
+          {{this.indiceGastoFinanciero}}
+        </div>
+        <div class="col">
+          {{this.tipoGastoFinanciero}}
+        </div>
+        <div class="col">
+          {{this.gastoFinancieroMensual}}
+        </div>
+        <div class="col listass">
+          {{this.gastoFinancieroAnual}}
+        </div>
+        <div class="col listass">
+          {{this.saldoGastoFinanciero}}
+        </div>
+        <div class="col listass">
+          {{this.comentarioGastoFinanciero}}
+        </div>
+        <div class="col text-end">
+          <button class="text-danger bg-transparent border-0 rounded-circle" type="button" onclick="restarElemento('{{this.indiceGastoFinanciero}}', '/presupuesto-restarGastoFinanciero')">
+            <i class="bi bi-dash-circle" data-bs-toggle="tooltip" data-bs-title="eliminar"></i>
+          </button>
+          <button class="text-secondary bg-transparent border-0 rounded-circle" type="button" onclick="consultarIngreso({{this.indiceGastoFinanciero}})" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+            <i class="bi bi-pencil-square" data-bs-toggle="tooltip" data-bs-title="modificar"></i>
+          </button>
+        </div>
+      </div>
+    {{/each}}
+  </div>
+</div>
+
+<!-- Modal Sumar Gasto Financiero -->
+<div class="modal fade" id="modal-gastos-financieros" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-body-secondary">
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">Detalle del Gasto Financiero</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="formGastosFinancieros" action="/presupuesto-sumarGastoFinanciero" method="post">
+        <div class="modal-body text-start">
+          <label for=""><b>Tipo:</b></label>
+          <select class="form-select mb-3 border-primary-subtle" id="tipoGastoFinanciero" name="tipoGastoFinanciero" onchange="infoTipoIngreso(this.value)" required>
+            <!--<option value="" selected disabled></option>-->
+            <option value="Crédito Consumo">Crédito Consumo</option>
+            <option value="Crédito Comercial">Crédito Comercial</option>
+            <option value="Crédito Hipotecario">Crédito Hipotecario</option>
+            <option value="Línea de Crédito">Línea de Crédito</option>
+            <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+            <option value="Otros">Otros</option>
+          </select>
+          <label for=""><b>Periocidad de Pago:</b></label>
+          <select class="form-select mb-3 border-primary-subtle" id="periocidadGastoFinanciero" name="periocidadGastoFinanciero" required>
+            <!--<option value="" selected disabled></option>-->
+            <option value="Mensual">Mensual</option>
+            <option value="Bimensual">Bimensual</option>
+            <option value="Trimestral">Trimestral</option>
+            <option value="Cuatrimestral">Cuatrimestral</option>
+            <option value="Semestral">Semestral</option>
+            <option value="Anual">Anual</option>
+          </select>
+          <label for=""><b>Monto Cuota:</b></label>
+          <input id="cuotaGastoFinanciero" name="cuotaGastoFinanciero" type="number" class="form-control mb-3 border-primary-subtle" required>
+          <label for=""><b>Saldo Adeudado:</b></label>
+          <input id="saldoGastoFinanciero" name="saldoGastoFinanciero" type="number" class="form-control mb-3 border-primary-subtle" required>
+          <label for=""><b>Comentario:</b></label>
+          <input id="comentarioGastoFinanciero" name="comentarioGastoFinanciero" type="text" class="form-control mb-3 border-primary-subtle" placeholder="">
+          <input id="indiceGastoFinanciero" name="indiceGastoFinanciero" type="number" class="form-control mb-3 border-primary-subtle" placeholder="" style="display: none;">
+        </div>  
+        <div class="modal-footer bg-body-tertiary">
+          <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal" data-bs-toggle="tooltip" data-bs-title="cancelar"><i class="bi bi-x-circle-fill"></i></button>
+          <button class="btn btn-outline-success" data-bs-toggle="tooltip" data-bs-title="guardar"><i class="bi bi-check-circle-fill"></i></button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

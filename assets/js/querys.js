@@ -4,12 +4,12 @@ const moment = require("moment");
 const { Pool } = require("pg");
 const pool = new Pool({
   host: "localhost",
-  //user: "postgres",
-  user: "almafinanciera",
-  //password: "postgres",
-  password: "alma123financiera",
-  //database: "alma",
-  database: "almafina_taurus",
+  user: "postgres",
+  //user: "almafinanciera",
+  password: "postgres",
+  //password: "alma123financiera",
+  database: "alma",
+  //database: "almafina_taurus",
   port: 5432,
 });
 

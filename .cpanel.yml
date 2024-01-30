@@ -2,4 +2,4 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/almafinanciera/alma/
-    - /bin/cp -R alma $DEPLOYPATH
+    - /bin/cp -r * $DEPLOYPATH

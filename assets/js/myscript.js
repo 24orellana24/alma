@@ -1,3 +1,20 @@
+//const { default: axios } = require("axios");
+//const { response } = require("express");
+
+//const { download } = require("express/lib/response");
+
+const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
+const toastPresupuestoInfo = document.getElementById('toastPresupuesto');
+const toastPresupuesto = bootstrap.Toast.getOrCreateInstance(toastPresupuestoInfo);
+
+const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+const popover = new bootstrap.Popover('.popover-dismiss', {
+  trigger: 'focus'
+});
+
 let tablaIngresos = [];
 
 // Script para validar rut
@@ -159,75 +176,93 @@ function informeRiesgo() {
 
   };
 
-}
+};
 
-// Sumar ingresos
+function infoTipoIngreso(element) {
+  console.log("prueba selector tipo ingreso", element);
+};
+
 function sumarIngreso() {
-  let tipoIngreso = document.getElementById("tipoIngreso");
-  let montoIngreso = document.getElementById("montoIngreso");
-  let comentarioIngreso = document.getElementById("comentarioIngreso");
-  let alertaPresupuestoIngreso = document.getElementById("alerta-presupuesto-ingresos");
-  let btnAlertaPresupuestoIngreso = document.getElementById("btn-alerta-presupuesto-ingresos");
-  if (tipoIngreso.value != "" && montoIngreso.value > 0) {
-    document.getElementById("tablaIngresos").style.display = "";
-    tablaIngresos.push({
-      tipoIngreso: tipoIngreso.value,
-      montoIngreso: Number(montoIngreso.value),
-      comentarioIngreso: comentarioIngreso.value,
-    });
-    tipoIngreso.value = "";
-    montoIngreso.value = "";
-    comentarioIngreso.value = "";
+  document.getElementById("formIngreso").reset();
+  document.getElementById("formIngreso").action = "/presupuesto-sumarIngreso";
+};
 
-    constructorTablaIngresos(tablaIngresos);
+function sumarGastoFinanciero() {
+  const modalGastosFinancieros = document.getElementById('modal-gastos-financieros');
+  const modalGastos = bootstrap.Modal.getOrCreateInstance(modalGastosFinancieros);
+  document.getElementById("formGastosFinancieros").reset();
+  document.getElementById("formGastosFinancieros").action = "/presupuesto-sumarGastoFinanciero";
+  modalGastos.show();
+};
 
-    escuchandoBotonesEliminarIngreso();
-    
-    ocultarAlertaPresupuestoIngreso(alertaPresupuestoIngreso);
-  
+function consultarIngreso(indiceIngreso) {
+  const indice = {"indice": indiceIngreso};
+  fetch("/presupuesto-consultarIngreso", {
+    method: "post",
+    body: JSON.stringify(indice),
+    headers: {"Content-type": "application/json; charset=UTF-8"}
+  })
+  .then(response => response.json())
+  .then(json => {
+    document.getElementById("tipoIngreso").value = json.tipoIngreso;
+    document.getElementById("tipoPeriocidad").value = json.tipoPeriocidad;
+    document.getElementById("montoIngreso").value = json.montoIngreso;
+    document.getElementById("comentarioIngreso").value = json.comentarioIngreso;
+    document.getElementById("indiceIngreso").value = json.indice;
+    document.getElementById("formIngreso").action = "/presupuesto-modificarIngreso";
+  })
+  .catch(err => console.log(err));
+};
+
+function restarElemento(indiceBorrar, accion) {
+  const indice = {"indice": indiceBorrar};
+  fetch(accion, {
+    method: "post",
+    body: JSON.stringify(indice),
+    headers: {"Content-type": "application/json; charset=UTF-8"}
+  });
+  location.reload()
+};
+
+function limpiarTabla(indice, accion, mensaje) {
+  if (indice == "") {
+    document.getElementById("toastMensajePresupuesto").innerText = `No hay ${mensaje} para eliminar`;
+    toastPresupuesto.show();
   } else {
-    alertaPresupuestoIngreso.style.display = "";
-    btnAlertaPresupuestoIngreso.focus();
+    document.getElementById("formModalBorrarTodo").action = accion;
+    document.getElementById("modalMensajeAlerta").innerText = mensaje.toUpperCase();
+    const myModal = document.getElementById('exampleModal');
+    const prueba = bootstrap.Modal.getOrCreateInstance(myModal);
+    prueba.show();
   };
 };
 
-function constructorTablaIngresos(tablaIngresos) {
-  document.getElementById("filasIngresos").innerHTML = ""
-  let indice = 0;
-  let sumaIngresos = 0;
-  let totalIngresos = document.getElementById("totalIngresos");
-  tablaIngresos.forEach(element => {
-    indice = indice + 1;
-    sumaIngresos = sumaIngresos + element.montoIngreso;      
-    document.getElementById("filasIngresos").innerHTML += `
-    <tr>
-      <th scope="row">${indice}</th>
-      <td>${element.tipoIngreso}</td>
-      <td>${element.montoIngreso}</td>
-      <td>${element.comentarioIngreso}</td>
-      <td><button id="btn-ing-${indice}" type="button" class="btn-Restar-Ingreso text-danger bg-transparent border-0 rounded-circle" title="eliminar"><i class="bi bi-dash-circle-fill"></i></button></td>
-    </tr>
-    `
-  });
-  totalIngresos.value = sumaIngresos;
-  if (tablaIngresos.length <= 0) document.getElementById("tablaIngresos").style.display = "none";
-};
-
-function escuchandoBotonesEliminarIngreso() {
-  let botonesRestarIngreso = document.querySelectorAll(".btn-Restar-Ingreso");
-
-  const clickRestarIngreso = function () {
-    const indiceEliminar = this.id.split("-");
-    tablaIngresos.splice(indiceEliminar[2] - 1, 1);
-    constructorTablaIngresos(tablaIngresos);
-    escuchandoBotonesEliminarIngreso();
+function ocultarMostrarIngresos(indice, mensaje) {
+  const ocultarMostrarIngresos = document.getElementById("tablaIngresos").style.display;
+  if (indice == undefined) {
+    document.getElementById("tablaIngresos").style.display = "none";
+    document.getElementById("toastMensajePresupuesto").innerText = "No hay ingresos para mostar";
+    toastPresupuesto.show();
+  } else {
+    if (ocultarMostrarIngresos == "none") {
+      document.getElementById("tablaIngresos").style.display = "";
+    } else {
+      document.getElementById("tablaIngresos").style.display = "none";
+    };
   };
-
-  botonesRestarIngreso.forEach(boton => {
-    boton.addEventListener("click", clickRestarIngreso);
-  });
 };
 
-function ocultarAlertaPresupuestoIngreso() {
-  document.getElementById("alerta-presupuesto-ingresos").style.display = "none";
+function ocultarMostrarGastosFinancieros(indice, mensaje) {
+  const ocultarMostrarGastosFinancieros = document.getElementById("tablaGastosFinancieros").style.display;
+  if (indice == undefined) {
+    document.getElementById("tablaGastosFinancieros").style.display = "none";
+    document.getElementById("toastMensajePresupuesto").innerText = "No hay gastos financieros para mostar";
+    toastPresupuesto.show();
+  } else {
+    if (ocultarMostrarGastosFinancieros == "none") {
+      document.getElementById("tablaGastosFinancieros").style.display = "";
+    } else {
+      document.getElementById("tablaGastosFinancieros").style.display = "none";
+    };
+  };
 };

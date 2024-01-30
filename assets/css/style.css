@@ -5,7 +5,13 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  font-size: small;
 }
+
+.img-principal {
+  width: 100%;
+  display: block;
+ }
 
 .mi-img-perfil {
   width: 100px;
@@ -34,6 +40,16 @@ footer {
 
 .alerta-presupuesto-ingresos {
   color: red;
+  font-size: small;
+}
+
+.mi-alerta {
+  margin: 0;
+  text-align: center;
+  border-radius: 0;
+}
+
+.tabla-prueba {
   font-size: small;
 }
 

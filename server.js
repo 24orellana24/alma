@@ -33,7 +33,7 @@ const expressFileUpload = require("express-fileupload");
 app.use(expressFileUpload({
   limits: { fileSize: 5000000 },
   abortOnLimit: true,
-  responseOnLimit: "El peso del archivo que intentas subir supera ellimite permitido",
+  responseOnLimit: "El peso del archivo que intentas subir supera el limite permitido",
 }));
 
 // Configuración dependencia body parser
@@ -48,7 +48,8 @@ app.use(express.static(`${__dirname}/assets`));
 
 // Configuración dependencias para dar formato a los números
 const numeral = require('numeral');
-//const { format } = require("path");
+const es = require('numeral/locales/es');
+numeral.locale('es');
 
 // Rutas de ejecución
 let fechaMiIndicador = "01-01-1900";
@@ -59,10 +60,10 @@ app.get("/", async (req, res) => {
     try {
       const { data } = await axios.get("https://mindicador.cl/api");
       indicadoresEconomicos = {
-        uf: numeral(data.uf.valor).format('$0,0.00'),
-        dolar: numeral(data.dolar.valor).format('$0,0.00'),
-        euro: numeral(data.euro.valor).format('$0,0.00'),
-        utm: numeral(data.utm.valor).format('$0,0.00'),
+        uf: numeral(data.uf.valor).format('0,0.00'),
+        dolar: numeral(data.dolar.valor).format('0,0.00'),
+        euro: numeral(data.euro.valor).format('0,0.00'),
+        utm: numeral(data.utm.valor).format('0,0.00'),
         ipc: numeral(data.ipc.valor).format('0.00'),
       };
       fechaMiIndicador = moment(indicadoresEconomicos.fecha).format("DD-MM-YYYY");
@@ -74,6 +75,7 @@ app.get("/", async (req, res) => {
   res.render("index", {
     layout: "index",
     indicadoresEconomicos: indicadoresEconomicos,
+    activarAlerta: "none"
   });
 });
 
@@ -84,9 +86,45 @@ app.get("/calculadora", async (req, res) => {
   });
 });
 
+
 app.get("/presupuesto", async (req, res) => {
+  // Ingresos
+  const ingresos = JSON.parse(JSON.stringify(tablaIngresos));
+  const totalIngresosMensuales = numeral(ingresos.reduce((previo, actual) => previo + actual.montoIngresoMensual, 0)).format("0,0");
+  const totalIngresosAnuales = numeral(ingresos.reduce((previo, actual) => previo + actual.montoIngresoAnual, 0)).format("0,0");
+  let verTablaIngresos = "none"
+  if (ingresos.length > 0) {
+    verTablaIngresos = ""
+  };
+  for (let i = 0; i < ingresos.length; i++) {
+    ingresos[i].montoIngreso = numeral(ingresos[i].montoIngreso).format("0,0");
+    ingresos[i].montoIngresoMensual = numeral(ingresos[i].montoIngresoMensual).format("0,0");
+    ingresos[i].montoIngresoAnual = numeral(ingresos[i].montoIngresoAnual).format("0,0");
+  };
+  // Gastos Financieros
+  const gastosFinancieros = JSON.parse(JSON.stringify(tablaGastosFinancieros));
+  const totalGastosFinancierosMensuales = numeral(gastosFinancieros.reduce((previo, actual) => previo + actual.gastoFinancieroMensual, 0)).format("0,0");
+  const totalGastosFinancierosAnuales = numeral(gastosFinancieros.reduce((previo, actual) => previo + actual.gastoFinancieroAnual, 0)).format("0,0");
+  let verTablaGastosFinancieros = "none"
+  if (gastosFinancieros.length > 0) {
+    verTablaGastosFinancieros = ""
+  };
+  for (let i = 0; i < gastosFinancieros.length; i++) {
+    gastosFinancieros[i].cuotaGastoFinanciero = numeral(gastosFinancieros[i].cuotaGastoFinanciero).format("0,0");
+    gastosFinancieros[i].gastoFinancieroMensual = numeral(gastosFinancieros[i].gastoFinancieroMensual).format("0,0");
+    gastosFinancieros[i].gastoFinancieroAnual = numeral(gastosFinancieros[i].gastoFinancieroAnual).format("0,0");
+    gastosFinancieros[i].saldoGastoFinanciero = numeral(gastosFinancieros[i].saldoGastoFinanciero).format("0,0");
+   };
   res.render("presupuesto", {
     layout: "presupuesto",
+    tablaIngresos: ingresos,
+    totalIngresosMensuales: totalIngresosMensuales,
+    totalIngresosAnuales: totalIngresosAnuales,
+    verTablaIngresos: verTablaIngresos,
+    tablaGastosFinancieros: gastosFinancieros,
+    totalGastosFinancierosMensuales: totalGastosFinancierosMensuales,
+    totalGastosFinancierosAnuales: totalGastosFinancierosAnuales,
+    verTablaGastosFinancieros: verTablaGastosFinancieros,
     indicadoresEconomicos: indicadoresEconomicos
   });
 });
@@ -101,7 +139,7 @@ app.get("/registro", async (req, res) => {
 app.get("/login-cliente", async (req, res) => {
   res.render("login", {
     layout: "login",
-    activarMensaje: "none",
+    activarAlerta: "none",
     ruta: req.route.path,
     tituloLogin: "Credenciales de Cliente",
     indicadoresEconomicos: indicadoresEconomicos
@@ -119,19 +157,24 @@ app.get("/login-asesor", async (req, res) => {
 });
 
 let resultadoCitasRut;
+let resultadoSemaforo;
 let resultadoSemaforos;
+let resultadoCliente;
+let notificacion = {
+  activarToast: false,
+  tipoToast: "",
+  mensajeToast: "",
+}; //revisar
 
 app.get("/dashboard", validarToken, async (req, res) => {
-  const resultadoCliente = await consultaCliente(datosDecoded.rut);
+  resultadoCliente = await consultaCliente(datosDecoded.rut);
   resultadoCitasRut = await consultaCitasRut(datosDecoded.rut);
-  let resultadoSemaforo = await consultaSemaforo(datosDecoded.rut);
+  resultadoSemaforo = await consultaSemaforo(datosDecoded.rut);
   resultadoSemaforos = await consultaSemaforos(datosDecoded.rut);
 
   resultadoCitasRut.forEach(element => element.fecha = moment(element.fecha).format("DD-MM-YYYY"));
 
   if (resultadoSemaforo.length <= 0) {
-    //resultadoSemaforo = [calcularSemaforo(resultadoSemaforo[0].ingreso, resultadoSemaforo[0].cuota, resultadoSemaforo[0].deuda, resultadoSemaforo[0].activo)];
-  //} else {
     resultadoSemaforo = [{
       ingreso: 0,
       cuota: 0,
@@ -181,7 +224,11 @@ app.get("/dashboard", validarToken, async (req, res) => {
     indicadores: resultadoSemaforos,
     totales: {"totalCitas": totalCitas = resultadoCitasRut.length, "totalSemaforos": totalSemaforos = resultadoSemaforos.length},
     indicadoresEconomicos: indicadoresEconomicos,
+    activarToast: notificacion.activarToast,
+    tipoToast: notificacion.tipoToast,
+    mensajeToast: notificacion.mensajeToast
   });
+  notificacion.activarToast = false;
 });
 
 let token = "";
@@ -245,8 +292,13 @@ app.post("/registro", async (req, res) => {
       res.send(`<script>alert("Cuenta creada con éxito"); window.location.href = "/login"; </script>`);
 
     } else if (resultadoCliente.length > 0  && resultadoCliente[0].estado === true) {
-      res.send(`<script>alert("Rut ya registrado"); window.location.href = "/"; </script>`);
-      
+      res.render("registro", {
+        layout: "registro",
+        indicadoresEconomicos: indicadoresEconomicos,
+        activarToast: true,
+        tipoToast: "danger",
+        mensajeToast: "Rut ya registrado",
+      });      
     } else {
 
       if (req.files) {
@@ -275,19 +327,23 @@ app.post("/login-cliente", async (req, res) => {
     } else {
       res.render("login", {
         layout: "login",
-        activarMensaje: "",
         ruta: req.route.path,
         tituloLogin: "Credenciales de Cliente",
-        indicadoresEconomicos: indicadoresEconomicos
+        indicadoresEconomicos: indicadoresEconomicos,
+        activarToast: true,
+        tipoToast: "danger",
+        mensajeToast: "Revisar Rut y/o Constraseña",
       });
     }
   } else {
     res.render("login", {
       layout: "login",
-      activarMensaje: "",
       ruta: req.route.path,
       tituloLogin: "Credenciales de Cliente",
-      indicadoresEconomicos: indicadoresEconomicos
+      indicadoresEconomicos: indicadoresEconomicos,
+      activarToast: true,
+      tipoToast: "danger",
+      mensajeToast: "Revisar Rut y/o Constraseña",
     });
   }
 });
@@ -319,8 +375,6 @@ app.post("/dashboard/agendar-asesoria", validarToken, async (req, res) => {
     semaforo: evaluacionCarga,
     rutCliente: datosDecoded.rut
   };
-
-  console.log(datosSemaforo)
   
   resultadoCitasRut = await consultaCitasRut(datosDecoded.rut);
   let citasPorFinalizar = 0;
@@ -330,7 +384,11 @@ app.post("/dashboard/agendar-asesoria", validarToken, async (req, res) => {
     }
   });
   if (citasPorFinalizar) {
-    res.send(`<script>alert("Ya tiene una asesoría en proceso, no puede generar una nueva asesoría"); window.location.href = "/dashboard"; </script>`);
+    notificacion.activarToast = true;
+    notificacion.tipoToast = "danger";
+    notificacion.mensajeToast = "Ya tiene una cita en proceso o sin finalizar. No puede generar una nueva cita.";
+    res.redirect("/dashboard");
+    
   } else {
     const resultadoCliente = await consultaCliente(datosDecoded.rut);
     let fechasDisponibles = [];
@@ -382,10 +440,17 @@ app.post("/dashboard/datos-personales", validarToken, async (req, res) => {
     }
   
     const resultado = await actualizarCliente(datosCliente);
+    resultado[0].fechanacimiento = moment(resultado[0].fechanacimiento).format("YYYY-MM-DD");
   
     if (resultado) {
-      res.send(`<script>alert("Datos personales actualizados"); window.location.href = "/dashboard/datos-personales"; </script>`);
-    }
+      res.render("infopersonal", {
+        layout: "infopersonal",
+        cliente: resultado[0],
+        indicadoresEconomicos: indicadoresEconomicos,
+        activarToast: true,
+        tipoToast: "success",
+        mensajeToast: "Datos Actualizados",
+    })};
 
   } else {
     res.send(`<script>alert("Password y Repetir Password deben ser iguales"); window.location.href = "/dashboard/datos-personales"; </script>`);
@@ -429,7 +494,10 @@ app.post("/login-asesor", async (req, res) => {
         activarMensaje: "",
         ruta: req.route.path,
         tituloLogin: "Credenciales de Asesor",
-        indicadoresEconomicos: indicadoresEconomicos
+        indicadoresEconomicos: indicadoresEconomicos,
+        activarToast: true,
+        tipoToast: "danger",
+        mensajeToast: "Revisar Rut y/o Constraseña",
       });
     }
   } else {
@@ -438,7 +506,10 @@ app.post("/login-asesor", async (req, res) => {
       activarMensaje: "",
       ruta: req.route.path,
       tituloLogin: "Credenciales de Asesor",
-      indicadoresEconomicos: indicadoresEconomicos
+      indicadoresEconomicos: indicadoresEconomicos,
+      activarToast: true,
+      tipoToast: "danger",
+      mensajeToast: "Revisar Rut y/o Constraseña",
     });
   }
 });
@@ -532,6 +603,110 @@ app.get("/dashboard/eliminar", validarToken, async (req, res) => {
   };
 
 });
+
+let tablaIngresos = [];
+app.post("/presupuesto-sumarIngreso", async (req, res) => {
+  const { tipoIngreso, tipoPeriocidad, montoIngreso, comentarioIngreso } = req.body;
+  const montoIngresoMensual = calcularPeriocidad(tipoPeriocidad, montoIngreso);
+  tablaIngresos.push({
+    indice: tablaIngresos.length + 1,
+    tipoIngreso: tipoIngreso,
+    tipoPeriocidad: tipoPeriocidad,
+    montoIngreso: Number(montoIngreso),
+    montoIngresoMensual: Number(montoIngresoMensual),
+    montoIngresoAnual: Number(montoIngresoMensual * 12),
+    comentarioIngreso: comentarioIngreso
+  });
+  res.redirect("/presupuesto");
+});
+
+let tablaGastosFinancieros = [];
+app.post("/presupuesto-sumarGastoFinanciero", async (req, res) => {
+  const { tipoGastoFinanciero, periocidadGastoFinanciero, cuotaGastoFinanciero, saldoGastoFinanciero, comentarioGastoFinanciero } = req.body;
+  const montoGastoFinancieroMensual = calcularPeriocidad(periocidadGastoFinanciero, cuotaGastoFinanciero);
+  tablaGastosFinancieros.push({
+    indiceGastoFinanciero: tablaGastosFinancieros.length + 1,
+    tipoGastoFinanciero: tipoGastoFinanciero,
+    periocidadGastoFinanciero: periocidadGastoFinanciero,
+    cuotaGastoFinanciero: Number(cuotaGastoFinanciero),
+    saldoGastoFinanciero: Number(saldoGastoFinanciero),
+    comentarioGastoFinanciero: comentarioGastoFinanciero,
+    gastoFinancieroMensual: Number(montoGastoFinancieroMensual),
+    gastoFinancieroAnual: Number(montoGastoFinancieroMensual * 12)
+  });
+  console.log(tablaGastosFinancieros);
+  res.redirect("/presupuesto");
+});
+
+function calcularPeriocidad (tipoPeriocidad, montoIngreso) {
+  let montoIngresoMensual = 0;
+  switch (tipoPeriocidad) {
+    case "Mensual":
+      montoIngresoMensual = montoIngreso / 1;
+      break;
+    case "Bimensual":
+      montoIngresoMensual = montoIngreso / 2;
+      break;
+    case "Trimestral":
+      montoIngresoMensual = montoIngreso / 3;
+      break;
+    case "Cuatrimestral":
+      montoIngresoMensual = montoIngreso / 4;
+      break;
+    case "Semestral":
+      montoIngresoMensual = montoIngreso / 6;
+      break;
+    case "Anual":
+      montoIngresoMensual = montoIngreso / 12;
+      break;
+  }
+  return montoIngresoMensual;
+}
+
+app.post("/presupuesto-consultarIngreso", async (req, res) => {
+  const indice = req.body.indice - 1;
+  res.send(tablaIngresos[indice]);
+});
+
+app.post("/presupuesto-modificarIngreso", async (req, res) => {
+  const {indiceIngreso, tipoIngreso, tipoPeriocidad, montoIngreso, comentarioIngreso } = req.body;
+  const montoIngresoMensual = calcularPeriocidad(tipoPeriocidad, montoIngreso);
+  tablaIngresos[indiceIngreso - 1].tipoIngreso = tipoIngreso;
+  tablaIngresos[indiceIngreso - 1].tipoPeriocidad = tipoPeriocidad;
+  tablaIngresos[indiceIngreso - 1].montoIngreso = montoIngreso;
+  tablaIngresos[indiceIngreso - 1].montoIngresoMensual = montoIngresoMensual;
+  tablaIngresos[indiceIngreso - 1].montoIngresoAnual = montoIngresoMensual * 12;
+  tablaIngresos[indiceIngreso - 1].comentarioIngreso = comentarioIngreso;
+  res.redirect("/presupuesto");
+});
+
+app.post("/presupuesto-borrarIngresos", async (req, res) => {
+  tablaIngresos = [];
+  res.redirect("/presupuesto");
+});
+
+app.post("/presupuesto-borrarGastosFinancieros", async (req, res) => {
+  tablaGastosFinancieros = [];
+  res.redirect("/presupuesto");
+});
+
+app.post("/presupuesto-restarIngreso", async (req, res) => {
+  const { indice } = req.body;
+  tablaIngresos = tablaIngresos.filter(tabla => tabla.indice != indice);
+  for (let i = 0; i < tablaIngresos.length; i++) {
+    tablaIngresos[i].indice = i + 1;
+  };
+  res.end();
+});
+
+app.post("/presupuesto-restarGastoFinanciero", async (req, res) => {
+  const { indice } = req.body;
+  tablaGastosFinancieros = tablaGastosFinancieros.filter(tabla => tabla.indice != indice);
+  for (let i = 0; i < tablaGastosFinancieros.length; i++) {
+    tablaGastosFinancieros[i].indice = i + 1;
+  };
+  res.end();
+}); 
 
 // Inicializando servidor en puerto 3000
 app.listen(3000, () => console.log("Servidor activo en puerto 3000"));
